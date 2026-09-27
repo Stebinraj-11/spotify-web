@@ -16,11 +16,6 @@ export const SAMPLE_REMOTE_TRACKS = [
     url: "https://res.cloudinary.com/fbombvjp/video/upload/v1789799423/Tom_Odell_-_Another_Love_Lyrics.mp3"
   },
   {
-    title: "Sneaky",
-    artist: "Kevin MacLeod",
-    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1789799388/sneaky-by-kevin-macleod.mp3"
-  },
-  {
     title: "Summertime Sadness",
     artist: "Lana Del Rey",
     url: "https://res.cloudinary.com/fbombvjp/video/upload/v1789799351/Lana-Del-Rey-Summertime-Sadness-_RawPraise.ng.mp3"

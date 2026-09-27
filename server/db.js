@@ -14,23 +14,6 @@ try {
 
 const DEFAULT_SEED_TRACKS = [
   {
-    id: '549c296b26bddb49',
-    filePath: 'sneaky-by-kevin-macleod.mp3',
-    title: 'Sneaky',
-    artist: 'Kevin MacLeod',
-    album: 'Royalty Free',
-    albumArtist: 'Kevin MacLeod',
-    genre: 'Classical',
-    year: 2010,
-    durationSec: 150.9,
-    trackNumber: null,
-    albumArtPath: null,
-    fileSize: 6038494,
-    format: 'mp3',
-    originalUrl: 'https://res.cloudinary.com/fbombvjp/video/upload/v1789799388/sneaky-by-kevin-macleod.mp3',
-    isLiked: 0,
-  },
-  {
     id: 'bfb115d4ca226de8',
     filePath: 'Love_Me_Not.mp3',
     title: 'Love Me Not',
