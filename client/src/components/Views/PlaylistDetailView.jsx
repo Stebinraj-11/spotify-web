@@ -127,8 +127,8 @@ export function PlaylistDetailView({
   return (
     <div className="animate-in fade-in duration-300">
       {/* Header */}
-      <div className="p-6 md:p-8 bg-gradient-to-b from-[#253835] via-[#121212] to-[#121212] flex flex-col sm:flex-row items-center sm:items-end gap-6 pb-8">
-        <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-xl bg-neutral-800 shadow-2xl flex-shrink-0 flex items-center justify-center overflow-hidden">
+      <div className="p-4 sm:p-6 md:p-8 bg-gradient-to-b from-[#253835] via-[#121212] to-[#121212] flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 pb-6 sm:pb-8">
+        <div className="w-36 h-36 sm:w-56 sm:h-56 rounded-xl bg-neutral-800 shadow-2xl flex-shrink-0 flex items-center justify-center overflow-hidden">
           {playlist.tracks && playlist.tracks.length > 0 && playlist.tracks[0].albumArtPath ? (
             <img
               src={playlist.tracks[0].albumArtPath}
@@ -181,7 +181,7 @@ export function PlaylistDetailView({
           ) : (
             <>
               <div className="flex items-center justify-center sm:justify-start gap-3 mt-1">
-                <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight truncate">
+                <h1 className="text-2xl sm:text-5xl font-black text-white leading-tight truncate">
                   {playlist.name}
                 </h1>
                 <button
@@ -201,7 +201,7 @@ export function PlaylistDetailView({
             </>
           )}
 
-          <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm text-neutral-300 mt-4 font-medium">
+          <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm text-neutral-300 mt-2 sm:mt-4 font-medium">
             <span className="font-bold text-white">Personal Library</span>
             <span>•</span>
             <span>
@@ -220,16 +220,16 @@ export function PlaylistDetailView({
       </div>
 
       {/* Action controls & Tracks list */}
-      <div className="p-6 md:p-8 space-y-6">
+      <div className="p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={handlePlayAll}
               disabled={!playlist.tracks || playlist.tracks.length === 0}
-              className="w-14 h-14 rounded-full bg-[#1db954] hover:bg-[#1ed760] disabled:opacity-40 text-black flex items-center justify-center transition shadow-lg transform hover:scale-105"
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#1db954] hover:bg-[#1ed760] disabled:opacity-40 text-black flex items-center justify-center transition shadow-lg active:scale-95"
               title="Play Playlist"
             >
-              <Play className="w-7 h-7 fill-black ml-0.5" />
+              <Play className="w-6 h-6 sm:w-7 sm:h-7 fill-black ml-0.5" />
             </button>
             <button
               onClick={handleShuffleAll}

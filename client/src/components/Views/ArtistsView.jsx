@@ -34,9 +34,9 @@ export function ArtistsView({ onNavigate }) {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-6 animate-in fade-in duration-300">
+    <div className="p-4 sm:p-6 md:p-8 space-y-5 md:space-y-6 animate-in fade-in duration-300">
       <div className="border-b border-white/10 pb-4">
-        <h1 className="text-3xl font-extrabold text-white">Artists</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Artists</h1>
         <p className="text-xs text-neutral-400 mt-1">
           {artists.length} {artists.length === 1 ? 'artist' : 'artists'} in your library
         </p>
@@ -50,14 +50,14 @@ export function ArtistsView({ onNavigate }) {
           No artists found in library.
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-5">
           {artists.map((artist, idx) => (
             <div
               key={idx}
               onClick={() => onNavigate('artist-detail', { name: artist.name })}
-              className="group p-4 bg-[#181818] hover:bg-[#282828] rounded-xl transition duration-300 cursor-pointer flex flex-col items-center text-center"
+              className="group p-3 sm:p-4 bg-[#181818] hover:bg-[#282828] rounded-xl transition duration-300 cursor-pointer flex flex-col items-center text-center"
             >
-              <div className="w-full aspect-square rounded-full bg-neutral-800 overflow-hidden mb-3.5 relative shadow-md">
+              <div className="w-full aspect-square rounded-full bg-neutral-800 overflow-hidden mb-2.5 sm:mb-3.5 relative shadow-md">
                 {artist.albumArtPath ? (
                   <img
                     src={artist.albumArtPath}
@@ -70,13 +70,13 @@ export function ArtistsView({ onNavigate }) {
                   </div>
                 )}
 
-                {/* Hover Play Button */}
+                {/* Touch/Hover Play Button */}
                 <button
                   onClick={(e) => handlePlayArtistDirect(e, artist.name)}
-                  className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#1db954] hover:bg-[#1ed760] text-black flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 duration-200"
+                  className="absolute bottom-2 right-2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1db954] hover:bg-[#1ed760] text-black flex items-center justify-center shadow-xl opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-all transform sm:translate-y-2 sm:group-hover:translate-y-0 duration-200"
                   title="Play Artist"
                 >
-                  <Play className="w-5 h-5 fill-black ml-0.5" />
+                  <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-black ml-0.5" />
                 </button>
               </div>
 

@@ -58,14 +58,14 @@ export function TracksView({ playlists = [], onAddToPlaylist }) {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-6 animate-in fade-in duration-300">
+    <div className="p-4 sm:p-6 md:p-8 space-y-5 md:space-y-6 animate-in fade-in duration-300">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-white/10">
+      <div className="flex items-center justify-between gap-4 pb-4 border-b border-white/10">
         <div>
-          <span className="text-xs uppercase tracking-widest text-neutral-400 font-semibold">
+          <span className="text-[10px] sm:text-xs uppercase tracking-widest text-neutral-400 font-semibold">
             Library
           </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mt-1">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-white mt-0.5">
             All Songs
           </h1>
           <p className="text-xs text-neutral-400 mt-1">
@@ -74,28 +74,28 @@ export function TracksView({ playlists = [], onAddToPlaylist }) {
         </div>
 
         {/* Play & Shuffle buttons */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <button
             onClick={handlePlayAll}
             disabled={tracks.length === 0}
-            className="w-12 h-12 rounded-full bg-[#1db954] hover:bg-[#1ed760] disabled:opacity-40 text-black flex items-center justify-center transition shadow-lg transform hover:scale-105"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#1db954] hover:bg-[#1ed760] disabled:opacity-40 text-black flex items-center justify-center transition shadow-lg active:scale-95"
             title="Play All"
           >
-            <Play className="w-6 h-6 fill-black ml-0.5" />
+            <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-black ml-0.5" />
           </button>
           <button
             onClick={handleShuffleAll}
             disabled={tracks.length === 0}
-            className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition disabled:opacity-40"
+            className="p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition disabled:opacity-40 active:scale-95"
             title="Shuffle"
           >
-            <Shuffle className="w-5 h-5" />
+            <Shuffle className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>
 
       {/* Filter & Sort Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
         {/* Search filter in view */}
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
@@ -109,7 +109,7 @@ export function TracksView({ playlists = [], onAddToPlaylist }) {
         </div>
 
         {/* Sort selector */}
-        <div className="flex items-center gap-2 self-end sm:self-auto text-xs text-neutral-400">
+        <div className="flex items-center justify-between sm:justify-end gap-2 text-xs text-neutral-400">
           <ArrowUpDown className="w-3.5 h-3.5" />
           <span>Sort by:</span>
           <select

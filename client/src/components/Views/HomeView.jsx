@@ -50,10 +50,10 @@ export function HomeView({ onNavigate, onOpenUrlModal, onOpenSettings }) {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-300">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8 animate-in fade-in duration-300">
       {/* Top Greeting */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
           {getGreeting()}
         </h1>
       </div>
@@ -107,21 +107,21 @@ export function HomeView({ onNavigate, onOpenUrlModal, onOpenSettings }) {
                     <Music2 className="w-6 h-6" />
                   )}
                 </div>
-                <div className="px-4 flex-1 min-w-0">
+                <div className="px-3 md:px-4 flex-1 min-w-0">
                   <p className="text-sm font-bold text-white truncate">{track.title}</p>
                   <p className="text-xs text-neutral-400 truncate">{track.artist}</p>
                 </div>
                 <button
-                  className={`w-10 h-10 rounded-full bg-[#1db954] text-black flex items-center justify-center mr-4 shadow-lg transition-all duration-200 transform ${
+                  className={`w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#1db954] text-black flex items-center justify-center mr-3 md:mr-4 shadow-lg transition-all duration-200 transform ${
                     isThisPlaying
                       ? 'opacity-100 scale-100'
-                      : 'opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100'
+                      : 'opacity-90 md:opacity-0 md:scale-75 md:group-hover:opacity-100 md:group-hover:scale-100'
                   }`}
                 >
                   {isThisPlaying ? (
-                    <Pause className="w-5 h-5 fill-black" />
+                    <Pause className="w-4 h-4 md:w-5 md:h-5 fill-black" />
                   ) : (
-                    <Play className="w-5 h-5 fill-black ml-0.5" />
+                    <Play className="w-4 h-4 md:w-5 md:h-5 fill-black ml-0.5" />
                   )}
                 </button>
               </div>
@@ -149,7 +149,7 @@ export function HomeView({ onNavigate, onOpenUrlModal, onOpenSettings }) {
               <div
                 key={i}
                 onClick={() => onNavigate('album-detail', { name: album.name })}
-                className="group p-4 bg-[#181818] hover:bg-[#282828] rounded-xl transition duration-300 cursor-pointer flex flex-col"
+                className="group p-3 sm:p-4 bg-[#181818] hover:bg-[#282828] rounded-xl transition duration-300 cursor-pointer flex flex-col"
               >
                 <div className="w-full aspect-square rounded-lg bg-neutral-800 overflow-hidden mb-3 relative shadow-md">
                   {album.albumArtPath ? (
@@ -190,7 +190,7 @@ export function HomeView({ onNavigate, onOpenUrlModal, onOpenSettings }) {
               <div
                 key={i}
                 onClick={() => onNavigate('artist-detail', { name: artist.name })}
-                className="group p-4 bg-[#181818] hover:bg-[#282828] rounded-xl transition duration-300 cursor-pointer flex flex-col items-center text-center"
+                className="group p-3 sm:p-4 bg-[#181818] hover:bg-[#282828] rounded-xl transition duration-300 cursor-pointer flex flex-col items-center text-center"
               >
                 <div className="w-full aspect-square rounded-full bg-neutral-800 overflow-hidden mb-3 relative shadow-md">
                   {artist.albumArtPath ? (

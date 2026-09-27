@@ -58,7 +58,7 @@ export function AlbumDetailView({ albumName, onNavigate, playlists = [], onAddTo
   return (
     <div className="animate-in fade-in duration-300">
       {/* Hero Header with subtle gradient */}
-      <div className="p-6 md:p-8 bg-gradient-to-b from-[#2a2a2a] to-[#121212] flex flex-col sm:flex-row items-center sm:items-end gap-6 pb-8">
+      <div className="p-4 sm:p-6 md:p-8 bg-gradient-to-b from-[#2a2a2a] to-[#121212] flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 pb-6 sm:pb-8">
         <button
           onClick={() => onNavigate('albums')}
           className="self-start sm:hidden p-2 rounded-full bg-black/40 text-white"
@@ -66,7 +66,7 @@ export function AlbumDetailView({ albumName, onNavigate, playlists = [], onAddTo
           <ArrowLeft className="w-5 h-5" />
         </button>
 
-        <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-xl bg-neutral-800 overflow-hidden shadow-2xl flex-shrink-0 flex items-center justify-center">
+        <div className="w-36 h-36 sm:w-56 sm:h-56 rounded-xl bg-neutral-800 overflow-hidden shadow-2xl flex-shrink-0 flex items-center justify-center">
           {albumData.albumArtPath ? (
             <img
               src={albumData.albumArtPath}
@@ -74,19 +74,19 @@ export function AlbumDetailView({ albumName, onNavigate, playlists = [], onAddTo
               className="w-full h-full object-cover"
             />
           ) : (
-            <Disc3 className="w-20 h-20 text-neutral-500" />
+            <Disc3 className="w-16 h-16 sm:w-20 sm:h-20 text-neutral-500" />
           )}
         </div>
 
         <div className="flex-1 text-center sm:text-left">
-          <span className="text-xs uppercase tracking-widest text-neutral-300 font-bold">
+          <span className="text-[10px] sm:text-xs uppercase tracking-widest text-neutral-300 font-bold">
             Album
           </span>
-          <h1 className="text-3xl sm:text-5xl font-black text-white mt-1 leading-tight">
+          <h1 className="text-2xl sm:text-5xl font-black text-white mt-1 leading-tight">
             {albumData.name}
           </h1>
 
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm text-neutral-300 mt-4 font-medium">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm text-neutral-300 mt-2 sm:mt-4 font-medium">
             <span
               onClick={() => onNavigate('artist-detail', { name: albumData.artist })}
               className="text-white hover:underline cursor-pointer font-bold"
@@ -111,21 +111,21 @@ export function AlbumDetailView({ albumName, onNavigate, playlists = [], onAddTo
       </div>
 
       {/* Action controls & Tracks list */}
-      <div className="p-6 md:p-8 space-y-6">
-        <div className="flex items-center gap-4">
+      <div className="p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={handlePlayAll}
-            className="w-14 h-14 rounded-full bg-[#1db954] hover:bg-[#1ed760] text-black flex items-center justify-center transition shadow-lg transform hover:scale-105"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#1db954] hover:bg-[#1ed760] text-black flex items-center justify-center transition shadow-lg active:scale-95"
             title="Play Album"
           >
-            <Play className="w-7 h-7 fill-black ml-0.5" />
+            <Play className="w-6 h-6 sm:w-7 sm:h-7 fill-black ml-0.5" />
           </button>
           <button
             onClick={handleShuffleAll}
-            className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition"
+            className="p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition active:scale-95"
             title="Shuffle Album"
           >
-            <Shuffle className="w-5 h-5" />
+            <Shuffle className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 

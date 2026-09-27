@@ -3,6 +3,7 @@ import { PlayerProvider } from './context/PlayerContext';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { Sidebar } from './components/Sidebar';
 import { PlayerBar } from './components/PlayerBar';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { AudioVisualizer } from './components/AudioVisualizer';
 import { QueueDrawer } from './components/QueueDrawer';
 import { ExpandedNowPlaying } from './components/ExpandedNowPlaying';
@@ -27,7 +28,6 @@ import {
   Menu,
   Link,
   Settings,
-  Lock,
   LogOut,
 } from 'lucide-react';
 
@@ -188,8 +188,8 @@ function MainApp() {
   return (
     <div className="flex flex-col h-screen w-screen bg-black text-white overflow-hidden font-sans select-none">
       {/* Upper Area: Sidebar + Scrollable View */}
-      <div className="flex-1 flex overflow-hidden p-2 gap-2">
-        {/* Left Sidebar */}
+      <div className="flex-1 flex overflow-hidden p-1.5 md:p-2 gap-2">
+        {/* Left Sidebar (Desktop fixed, Mobile off-canvas drawer) */}
         <Sidebar
           currentView={currentView}
           onNavigate={navigateTo}
@@ -205,12 +205,13 @@ function MainApp() {
         {/* Main Content Pane */}
         <main className="flex-1 bg-[#121212] rounded-xl flex flex-col overflow-hidden relative shadow-inner">
           {/* Top Bar (Header) */}
-          <header className="h-16 px-6 flex items-center justify-between border-b border-white/5 bg-[#121212]/90 backdrop-blur-md sticky top-0 z-30">
+          <header className="h-14 md:h-16 px-4 md:px-6 flex items-center justify-between border-b border-white/5 bg-[#121212]/90 backdrop-blur-md sticky top-0 z-30">
             {/* Nav Arrows & Mobile Hamburger */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 md:gap-2">
               <button
                 onClick={() => setIsMobileSidebarOpen(true)}
-                className="md:hidden p-2 rounded-full hover:bg-white/10 text-neutral-300"
+                className="md:hidden p-2 rounded-full hover:bg-white/10 text-neutral-300 active:scale-95"
+                title="Open Library Menu"
               >
                 <Menu className="w-5 h-5" />
               </button>
@@ -218,35 +219,35 @@ function MainApp() {
               <button
                 onClick={handleBack}
                 disabled={historyIndex === 0}
-                className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 disabled:opacity-30 text-white flex items-center justify-center transition"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 hover:bg-black/90 disabled:opacity-30 text-white flex items-center justify-center transition"
                 title="Go back"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
 
               <button
                 onClick={handleForward}
                 disabled={historyIndex >= history.length - 1}
-                className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 disabled:opacity-30 text-white flex items-center justify-center transition"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 hover:bg-black/90 disabled:opacity-30 text-white flex items-center justify-center transition hidden sm:flex"
                 title="Go forward"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
             {/* Quick Actions in Header */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setIsUrlModalOpen(true)}
-                className="px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition"
+                className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95"
               >
                 <Link className="w-3.5 h-3.5 text-[#1db954]" />
-                <span className="hidden sm:inline">Add URL Track</span>
+                <span className="hidden sm:inline">Add URL</span>
               </button>
 
               <button
                 onClick={() => setIsSettingsOpen(true)}
-                className="p-2 rounded-full hover:bg-white/10 text-neutral-300 hover:text-white transition"
+                className="p-2 rounded-full hover:bg-white/10 text-neutral-300 hover:text-white transition active:scale-95"
                 title="Settings & Scan"
               >
                 <Settings className="w-4 h-4" />
@@ -264,8 +265,8 @@ function MainApp() {
             </div>
           </header>
 
-          {/* View Container */}
-          <div className="flex-1 overflow-y-auto">
+          {/* View Container with bottom padding so content clears mobile floating mini player + bottom nav */}
+          <div className="flex-1 overflow-y-auto pb-36 md:pb-8">
             {currentView.type === 'home' && (
               <HomeView
                 onNavigate={navigateTo}
@@ -335,8 +336,11 @@ function MainApp() {
         </main>
       </div>
 
-      {/* Persistent Bottom Player Bar */}
+      {/* Persistent Bottom Player Bar (Desktop Full Bar + Mobile Floating Mini Player) */}
       <PlayerBar />
+
+      {/* Mobile Bottom Tab Bar (Spotify Native iOS/Android Feel) */}
+      <MobileBottomNav currentView={currentView} onNavigate={navigateTo} />
 
       {/* Overlay Modals & Drawers */}
       <AudioVisualizer />

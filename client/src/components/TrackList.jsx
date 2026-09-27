@@ -48,8 +48,8 @@ export function TrackList({
 
   return (
     <div className="w-full">
-      {/* Table Header */}
-      <div className="grid grid-cols-[16px_4fr_3fr_2fr_minmax(120px,1fr)] gap-4 px-4 py-2 border-b border-white/10 text-xs font-semibold uppercase tracking-wider text-neutral-400 select-none items-center">
+      {/* Desktop Table Header (Hidden on Mobile) */}
+      <div className="hidden md:grid grid-cols-[16px_4fr_3fr_2fr_minmax(120px,1fr)] gap-4 px-4 py-2 border-b border-white/10 text-xs font-semibold uppercase tracking-wider text-neutral-400 select-none items-center">
         <span className="text-center">#</span>
         <span>Title</span>
         {showAlbum && <span>Album</span>}
@@ -69,12 +69,12 @@ export function TrackList({
             <div
               key={`${track.id}-${index}`}
               onClick={() => handleRowClick(track, index)}
-              className={`group grid grid-cols-[16px_4fr_3fr_2fr_minmax(120px,1fr)] gap-4 px-4 py-2.5 rounded-md hover:bg-white/10 transition cursor-pointer items-center select-none ${
+              className={`group flex md:grid md:grid-cols-[16px_4fr_3fr_2fr_minmax(120px,1fr)] gap-3 md:gap-4 px-3 md:px-4 py-2.5 rounded-lg hover:bg-white/10 transition cursor-pointer items-center select-none active:bg-white/15 ${
                 isCurrent ? 'bg-white/5' : ''
               }`}
             >
-              {/* Col 1: # or Play/Pause Button */}
-              <div className="flex items-center justify-center text-sm font-mono text-neutral-400">
+              {/* Desktop Column 1: # or Play/Pause Button */}
+              <div className="hidden md:flex items-center justify-center text-sm font-mono text-neutral-400">
                 <span className="group-hover:hidden">
                   {isRowPlaying ? (
                     <div className="flex items-end gap-0.5 h-3.5">
@@ -100,9 +100,9 @@ export function TrackList({
                 </button>
               </div>
 
-              {/* Col 2: Cover + Title + Artist */}
-              <div className="flex items-center gap-3 min-w-0 pr-2">
-                <div className="w-10 h-10 rounded bg-neutral-800 overflow-hidden flex-shrink-0 relative shadow-sm">
+              {/* Column 2: Cover + Title + Artist */}
+              <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-initial pr-2">
+                <div className="w-11 h-11 md:w-10 md:h-10 rounded bg-neutral-800 overflow-hidden flex-shrink-0 relative shadow-sm">
                   {track.albumArtPath ? (
                     <img
                       src={track.albumArtPath}
@@ -112,6 +112,14 @@ export function TrackList({
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-700 to-neutral-900 text-neutral-400">
                       <Music2 className="w-5 h-5" />
+                    </div>
+                  )}
+                  {isRowPlaying && (
+                    <div className="md:hidden absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <div className="flex items-end gap-0.5 h-3">
+                        <div className="w-0.5 bg-[#1db954] animate-pulse h-2" />
+                        <div className="w-0.5 bg-[#1db954] animate-pulse h-3" />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -127,29 +135,29 @@ export function TrackList({
                 </div>
               </div>
 
-              {/* Col 3: Album */}
+              {/* Column 3: Album (Hidden on mobile) */}
               {showAlbum && (
-                <div className="text-sm text-neutral-400 truncate pr-2">
+                <div className="hidden md:block text-sm text-neutral-400 truncate pr-2">
                   {track.album || 'Single'}
                 </div>
               )}
 
-              {/* Col 4: Date Added */}
+              {/* Column 4: Date Added (Hidden on mobile) */}
               {showDateAdded && (
-                <div className="text-xs text-neutral-400 font-mono">
+                <div className="hidden md:block text-xs text-neutral-400 font-mono">
                   {formatDate(track.dateAdded)}
                 </div>
               )}
 
-              {/* Col 5: Duration & Action Icons */}
-              <div className="flex items-center justify-end gap-3 text-xs text-neutral-400 font-mono relative">
+              {/* Column 5: Duration & Action Icons */}
+              <div className="flex items-center justify-end gap-2 md:gap-3 text-xs text-neutral-400 font-mono relative flex-shrink-0">
                 {/* Heart Button */}
                 <button
                   onClick={(e) => handleLike(e, track.id)}
-                  className={`p-1.5 transition ${
+                  className={`p-2 transition ${
                     track.isLiked
                       ? 'text-[#1db954]'
-                      : 'opacity-0 group-hover:opacity-100 hover:text-white'
+                      : 'opacity-70 md:opacity-0 md:group-hover:opacity-100 hover:text-white'
                   }`}
                   title={track.isLiked ? 'Unlike' : 'Like'}
                 >
@@ -161,7 +169,7 @@ export function TrackList({
                 </button>
 
                 {/* Duration */}
-                <span>{formatDuration(track.durationSec)}</span>
+                <span className="hidden sm:inline">{formatDuration(track.durationSec)}</span>
 
                 {/* Playlist reordering buttons if inside playlist */}
                 {playlistId && onMoveTrack && (
@@ -199,7 +207,7 @@ export function TrackList({
                       setActiveMenuTrackId(activeMenuTrackId === track.id ? null : track.id);
                       setShowPlaylistMenu(false);
                     }}
-                    className="p-1.5 rounded-full hover:bg-white/10 hover:text-white opacity-0 group-hover:opacity-100 transition"
+                    className="p-2 rounded-full hover:bg-white/10 hover:text-white opacity-80 md:opacity-0 md:group-hover:opacity-100 transition"
                     title="More actions"
                   >
                     <MoreHorizontal className="w-4 h-4" />
@@ -237,7 +245,7 @@ export function TrackList({
                           </button>
 
                           {showPlaylistMenu && (
-                            <div className="absolute right-full top-0 mr-1 w-44 bg-[#282828] border border-white/10 rounded-lg shadow-2xl py-1 z-50 max-h-48 overflow-y-auto">
+                            <div className="absolute right-0 md:right-full top-full md:top-0 mt-1 md:mt-0 md:mr-1 w-44 bg-[#282828] border border-white/10 rounded-lg shadow-2xl py-1 z-50 max-h-48 overflow-y-auto">
                               {playlists.map((pl) => (
                                 <button
                                   key={pl.id}

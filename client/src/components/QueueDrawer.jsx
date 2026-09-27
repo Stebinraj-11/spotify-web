@@ -34,7 +34,12 @@ export function QueueDrawer() {
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[#121212] border-l border-white/10 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+    <>
+      <div
+        onClick={() => setIsQueueOpen(false)}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+      />
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[#121212] border-l border-white/10 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
       {/* Header */}
       <div className="flex items-center justify-between p-5 border-b border-white/10">
         <div className="flex items-center gap-3">
@@ -189,5 +194,6 @@ export function QueueDrawer() {
         </div>
       </div>
     </div>
-  );
+  </>
+);
 }

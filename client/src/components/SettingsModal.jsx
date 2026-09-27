@@ -108,9 +108,9 @@ export function SettingsModal({ isOpen, onClose, onRescanCompleted }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-[#181818] border border-white/10 rounded-2xl shadow-2xl p-6 overflow-hidden">
+      <div className="relative w-full max-w-xl bg-[#181818] border border-white/10 rounded-2xl shadow-2xl p-4 sm:p-6 overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+        <div className="flex items-center justify-between pb-4 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center text-white">
               <HardDrive className="w-5 h-5 text-[#1db954]" />
@@ -128,10 +128,10 @@ export function SettingsModal({ isOpen, onClose, onRescanCompleted }) {
           </button>
         </div>
 
-        <div className="py-5 space-y-6">
+        <div className="py-4 space-y-5 flex-1 overflow-y-auto">
           {/* Library Stats */}
           {settings && (
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               <div className="bg-neutral-900/80 p-3 rounded-xl border border-white/5 text-center">
                 <Music className="w-4 h-4 text-[#1db954] mx-auto mb-1" />
                 <p className="text-lg font-bold text-white">{settings.trackCount}</p>

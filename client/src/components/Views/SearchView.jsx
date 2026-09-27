@@ -77,7 +77,7 @@ export function SearchView({ onNavigate, playlists = [], onAddToPlaylist }) {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-300">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8 animate-in fade-in duration-300">
       {/* Search Header Bar */}
       <div className="relative max-w-xl">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
@@ -87,7 +87,7 @@ export function SearchView({ onNavigate, playlists = [], onAddToPlaylist }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="What do you want to play? (Song, artist, album)"
-          className="w-full pl-12 pr-10 py-3.5 rounded-full bg-neutral-900 border border-white/10 text-white placeholder-neutral-500 text-sm focus:outline-none focus:border-[#1db954] transition shadow-lg"
+          className="w-full pl-12 pr-10 py-3 md:py-3.5 rounded-full bg-neutral-900 border border-white/10 text-white placeholder-neutral-500 text-sm focus:outline-none focus:border-[#1db954] transition shadow-lg"
         />
         {query && (
           <button
@@ -118,28 +118,28 @@ export function SearchView({ onNavigate, playlists = [], onAddToPlaylist }) {
                   <h2 className="text-xl font-bold text-white">Top Result</h2>
                   <div
                     onClick={handlePlayTop}
-                    className="group p-5 rounded-2xl bg-[#181818] hover:bg-[#282828] transition duration-300 cursor-pointer flex flex-col justify-between h-56 relative shadow-lg"
+                    className="group p-4 sm:p-5 rounded-2xl bg-[#181818] hover:bg-[#282828] transition duration-300 cursor-pointer flex flex-col justify-between h-52 sm:h-56 relative shadow-lg"
                   >
-                    <div className="w-20 h-20 rounded-xl bg-neutral-800 overflow-hidden shadow-md flex items-center justify-center">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-neutral-800 overflow-hidden shadow-md flex items-center justify-center">
                       {topMatch.albumArtPath ? (
                         <img src={topMatch.albumArtPath} alt={topMatch.title} className="w-full h-full object-cover" />
                       ) : (
-                        <Music2 className="w-10 h-10 text-neutral-500" />
+                        <Music2 className="w-8 h-8 sm:w-10 sm:h-10 text-neutral-500" />
                       )}
                     </div>
 
                     <div className="min-w-0 pr-12">
-                      <h3 className="text-2xl font-bold text-white truncate">{topMatch.title}</h3>
-                      <p className="text-sm text-neutral-400 truncate mt-1">
+                      <h3 className="text-xl sm:text-2xl font-bold text-white truncate">{topMatch.title}</h3>
+                      <p className="text-xs sm:text-sm text-neutral-400 truncate mt-1">
                         Song • <span className="text-white font-medium">{topMatch.artist}</span>
                       </p>
                     </div>
 
                     {/* Play button */}
                     <button
-                      className="absolute bottom-5 right-5 w-12 h-12 rounded-full bg-[#1db954] hover:bg-[#1ed760] text-black flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 transition transform translate-y-2 group-hover:translate-y-0"
+                      className="absolute bottom-4 right-4 sm:bottom-5 sm:right-5 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#1db954] hover:bg-[#1ed760] text-black flex items-center justify-center shadow-xl opacity-100 md:opacity-0 md:group-hover:opacity-100 transition transform md:translate-y-2 md:group-hover:translate-y-0"
                     >
-                      <Play className="w-6 h-6 fill-black ml-0.5" />
+                      <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-black ml-0.5" />
                     </button>
                   </div>
                 </div>
