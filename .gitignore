@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+client/node_modules/
+
+# Production build output
+client/dist/
+
+# Environment and sensitive files
+.env
+*.log
+
+# SQLite temporary WAL / SHM files
+*.db-wal
+*.db-shm
+data/*.db-wal
+data/*.db-shm
+
+# IDE / System files
+.gemini/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  spotify:
+    build: .
+    container_name: spotify-web-player
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - HOST=0.0.0.0
+      - DATA_DIR=/app/data
+      # Set a password to protect your online player:
+      - APP_PASSWORD=
+      - SESSION_SECRET=change-this-to-a-secure-random-secret
+    volumes:
+      # Persistent storage for SQLite database, extracted covers, and downloaded songs
+      - ./data:/app/data
+      # Optional: Map an existing local music directory on your host machine to /music
+      # - /path/to/your/host/music:/music

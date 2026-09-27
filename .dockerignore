@@ -1,0 +1,13 @@
+node_modules
+client/node_modules
+client/dist
+.git
+.gemini
+*.log
+.env
+data/
+library.db
+library.db-shm
+library.db-wal
+covers/
+music/
