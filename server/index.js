@@ -29,6 +29,7 @@ app.use(express.json());
 
 // Serve extracted album art with long caching
 app.use('/covers', express.static(COVERS_DIR, { maxAge: '7d' }));
+app.use('/covers', express.static(path.join(rootDir, 'data', 'covers'), { maxAge: '7d' }));
 
 // Helper to get active music directory from settings
 function getMusicDir() {
@@ -515,14 +516,18 @@ if (fs.existsSync(clientDist)) {
   });
 }
 
-// Start server on 0.0.0.0 for cloud hosting
-app.listen(PORT, HOST, () => {
-  console.log(`[Server] Spotify Streaming Server running on http://${HOST}:${PORT}`);
-  console.log(`[Server] Music directory: ${getMusicDir()}`);
-  console.log(`[Server] Covers directory: ${COVERS_DIR}`);
-  if (APP_PASSWORD) {
-    console.log(`[Server] 🔒 Single-user password protection is ENABLED.`);
-  } else {
-    console.log(`[Server] 🌐 Open mode (no password required). Set APP_PASSWORD to secure.`);
-  }
-});
+// Start server on 0.0.0.0 for standalone / cloud hosting (not called inside Vercel serverless)
+if (!process.env.VERCEL) {
+  app.listen(PORT, HOST, () => {
+    console.log(`[Server] Spotify Streaming Server running on http://${HOST}:${PORT}`);
+    console.log(`[Server] Music directory: ${getMusicDir()}`);
+    console.log(`[Server] Covers directory: ${COVERS_DIR}`);
+    if (APP_PASSWORD) {
+      console.log(`[Server] 🔒 Single-user password protection is ENABLED.`);
+    } else {
+      console.log(`[Server] 🌐 Open mode (no password required). Set APP_PASSWORD to secure.`);
+    }
+  });
+}
+
+export default app;
