@@ -8,11 +8,7 @@ import {
   Users,
   Heart,
   Plus,
-  Link,
-  Settings,
-  RefreshCw,
-  FolderOpen,
-  Sparkles,
+  User,
   Trash2,
 } from 'lucide-react';
 
@@ -22,8 +18,7 @@ export function Sidebar({
   playlists = [],
   onCreatePlaylist,
   onDeletePlaylist,
-  onOpenUrlModal,
-  onOpenSettings,
+  onOpenAccount,
   isMobileOpen,
   onCloseMobile,
 }) {
@@ -230,19 +225,11 @@ export function Sidebar({
           {/* Action Links */}
           <div className="pt-3 border-t border-white/5 space-y-1 mt-auto">
             <button
-              onClick={onOpenUrlModal}
+              onClick={onOpenAccount}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-neutral-300 hover:text-white hover:bg-white/5 transition"
             >
-              <Link className="w-4 h-4 text-[#1db954]" />
-              <span>Add from Direct URL</span>
-            </button>
-
-            <button
-              onClick={onOpenSettings}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-neutral-300 hover:text-white hover:bg-white/5 transition"
-            >
-              <Settings className="w-4 h-4 text-neutral-400" />
-              <span>Library Settings & Scan</span>
+              <User className="w-4 h-4 text-[#1db954]" />
+              <span>Account & Settings</span>
             </button>
           </div>
         </div>

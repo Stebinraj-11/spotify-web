@@ -5,13 +5,13 @@ import {
   Pause,
   Sparkles,
   Music2,
-  CloudDownload,
+  User,
   Disc3,
   Users,
   ChevronRight,
 } from 'lucide-react';
 
-export function HomeView({ onNavigate, onOpenUrlModal, onOpenSettings }) {
+export function HomeView({ onNavigate, onOpenAccount }) {
   const { playTrack, currentTrack, isPlaying, togglePlay } = usePlayer();
   const [recentTracks, setRecentTracks] = useState([]);
   const [albums, setAlbums] = useState([]);
@@ -73,17 +73,11 @@ export function HomeView({ onNavigate, onOpenUrlModal, onOpenSettings }) {
           </div>
           <div className="flex items-center gap-3 flex-wrap justify-center">
             <button
-              onClick={onOpenUrlModal}
+              onClick={onOpenAccount}
               className="px-5 py-3 rounded-full bg-[#1db954] hover:bg-[#1ed760] text-black font-bold text-sm flex items-center gap-2 transition shadow-lg transform hover:scale-105"
             >
-              <CloudDownload className="w-4 h-4" />
-              <span>Import Cloud Tracks</span>
-            </button>
-            <button
-              onClick={onOpenSettings}
-              className="px-5 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition"
-            >
-              Scan Local Folder
+              <User className="w-4 h-4" />
+              <span>Account & Settings</span>
             </button>
           </div>
         </div>

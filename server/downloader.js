@@ -37,8 +37,63 @@ export const SAMPLE_REMOTE_TRACKS = [
   },
   {
     title: "Love Me Not",
-    artist: "Unknown Artist",
+    artist: "Ravyn Lenae",
     url: "https://res.cloudinary.com/fbombvjp/video/upload/v1789799268/Love_Me_Not.mp3"
+  },
+  {
+    title: "Superman",
+    artist: "Eminem",
+    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1790503355/eminem-s-song_eminem-superman.mp3"
+  },
+  {
+    title: "Hypnotize",
+    artist: "The Notorious B.I.G.",
+    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1790503355/Hypnotize_-_2007_Remaster.mp3"
+  },
+  {
+    title: "7 Years",
+    artist: "Lukas Graham",
+    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1790503351/7_Years_-_Lukas_Graham.mp3"
+  },
+  {
+    title: "Still D.R.E.",
+    artist: "Dr. Dre ft. Snoop Dogg",
+    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1790503350/Still_D.R.E.mp3"
+  },
+  {
+    title: "Fairytale",
+    artist: "Alexander Rybak",
+    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1790503349/fairytale_Alexander_rybak.mp3"
+  },
+  {
+    title: "Thrift Shop",
+    artist: "Macklemore & Ryan Lewis ft. Wanz",
+    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1790503349/TMACKLEMORE_-Thrift_Shop.mp3"
+  },
+  {
+    title: "Mask Off",
+    artist: "Future",
+    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1790503346/Mask_Off.mp3"
+  },
+  {
+    title: "Sweater Weather",
+    artist: "The Neighbourhood",
+    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1790503345/The_Neighbourhood_-_Sweater_Weather_Official_Video.mp3"
+  },
+  {
+    title: "Without Me",
+    artist: "Eminem",
+    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1790503343/Eminem_Without_Me_Official_Music_Video.mp3"
+  },
+  {
+    title: "Daylight",
+    artist: "David Kushner",
+    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1790503339/Daylight.mp3"
+  },
+  {
+    title: "The Real Slim Shady",
+    artist: "Eminem",
+    url: "https://res.cloudinary.com/fbombvjp/video/upload/v1790503337/Eminem_The_Real_Slim_Shady_Official_Video_Clean_Version.mp3"
   }
 ];
 

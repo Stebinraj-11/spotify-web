@@ -7,8 +7,7 @@ import { MobileBottomNav } from './components/MobileBottomNav';
 import { AudioVisualizer } from './components/AudioVisualizer';
 import { QueueDrawer } from './components/QueueDrawer';
 import { ExpandedNowPlaying } from './components/ExpandedNowPlaying';
-import { AddFromUrlModal } from './components/AddFromUrlModal';
-import { SettingsModal } from './components/SettingsModal';
+import { AccountModal } from './components/AccountModal';
 import { LoginModal } from './components/LoginModal';
 import { getAuthToken, setAuthToken } from './utils/api';
 
@@ -26,8 +25,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  Link,
-  Settings,
+  User,
   LogOut,
 } from 'lucide-react';
 
@@ -49,8 +47,8 @@ function MainApp() {
   const [playlists, setPlaylists] = useState([]);
 
   // Modals & Drawers
-  const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [accountUser, setAccountUser] = useState('Stebin');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Check server auth status on load
@@ -65,10 +63,23 @@ function MainApp() {
 
       if (!data.authRequired || data.authenticated) {
         fetchPlaylists();
+        fetchAccountInfo();
       }
     } catch (err) {
       console.warn('Auth check error:', err);
       setAuthChecked(true);
+    }
+  };
+
+  const fetchAccountInfo = async () => {
+    try {
+      const res = await fetch('/api/account');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.username) setAccountUser(data.username);
+      }
+    } catch (err) {
+      // ignore
     }
   };
 
@@ -196,8 +207,7 @@ function MainApp() {
           playlists={playlists}
           onCreatePlaylist={handleCreatePlaylist}
           onDeletePlaylist={handleDeletePlaylist}
-          onOpenUrlModal={() => setIsUrlModalOpen(true)}
-          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenAccount={() => setIsAccountOpen(true)}
           isMobileOpen={isMobileSidebarOpen}
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
@@ -235,22 +245,17 @@ function MainApp() {
               </button>
             </div>
 
-            {/* Quick Actions in Header */}
+            {/* Account & Profile Badge in Header */}
             <div className="flex items-center gap-2 sm:gap-3">
               <button
-                onClick={() => setIsUrlModalOpen(true)}
-                className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95"
+                onClick={() => setIsAccountOpen(true)}
+                className="flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition active:scale-95 border border-white/10 shadow-sm"
+                title="Account & Login Settings"
               >
-                <Link className="w-3.5 h-3.5 text-[#1db954]" />
-                <span className="hidden sm:inline">Add URL</span>
-              </button>
-
-              <button
-                onClick={() => setIsSettingsOpen(true)}
-                className="p-2 rounded-full hover:bg-white/10 text-neutral-300 hover:text-white transition active:scale-95"
-                title="Settings & Scan"
-              >
-                <Settings className="w-4 h-4" />
+                <div className="w-6 h-6 rounded-full bg-[#1db954] flex items-center justify-center text-black font-black text-xs">
+                  {accountUser ? accountUser[0].toUpperCase() : 'S'}
+                </div>
+                <span className="hidden sm:inline font-bold">{accountUser || 'Account'}</span>
               </button>
 
               {isAuthRequired && (
@@ -270,8 +275,7 @@ function MainApp() {
             {currentView.type === 'home' && (
               <HomeView
                 onNavigate={navigateTo}
-                onOpenUrlModal={() => setIsUrlModalOpen(true)}
-                onOpenSettings={() => setIsSettingsOpen(true)}
+                onOpenAccount={() => setIsAccountOpen(true)}
               />
             )}
 
@@ -346,15 +350,19 @@ function MainApp() {
       <AudioVisualizer />
       <QueueDrawer />
       <ExpandedNowPlaying />
-      <AddFromUrlModal
-        isOpen={isUrlModalOpen}
-        onClose={() => setIsUrlModalOpen(false)}
-        onTrackAdded={handleTrackAdded}
-      />
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        onRescanCompleted={fetchPlaylists}
+      <AccountModal
+        isOpen={isAccountOpen}
+        onClose={() => {
+          setIsAccountOpen(false);
+          fetchAccountInfo();
+          checkAuth();
+        }}
+        onOpenVisualizer={() => {
+          setIsAccountOpen(false);
+          setIsVisualizerOpen(true);
+        }}
+        onLockSession={handleLogout}
+        isAuthRequired={isAuthRequired}
       />
     </div>
   );

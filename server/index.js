@@ -37,33 +37,46 @@ function getMusicDir() {
   return row ? row.value : DEFAULT_MUSIC_DIR;
 }
 
-// ----------------- AUTHENTICATION (OPTIONAL SINGLE USER PASSWORD) -----------------
-// If APP_PASSWORD environment variable is set, protect the API
+// ----------------- AUTHENTICATION & ACCOUNT PROFILE -----------------
+function getActivePassword() {
+  if (APP_PASSWORD && APP_PASSWORD.trim().length > 0) return APP_PASSWORD.trim();
+  try {
+    const row = db.prepare('SELECT value FROM settings WHERE key = ?').get('appPassword');
+    return row ? row.value : null;
+  } catch (err) {
+    return null;
+  }
+}
+
 function generateToken() {
-  return crypto.createHmac('sha256', SESSION_SECRET).update(APP_PASSWORD).digest('hex');
+  const pwd = getActivePassword() || '';
+  return crypto.createHmac('sha256', SESSION_SECRET).update(pwd).digest('hex');
 }
 
 function checkTokenValid(token) {
-  if (!APP_PASSWORD) return true;
+  const pwd = getActivePassword();
+  if (!pwd) return true;
   if (!token) return false;
   return token === generateToken();
 }
 
 app.get('/api/auth/status', (req, res) => {
   const token = req.headers['x-auth-token'] || req.query.token;
+  const pwd = getActivePassword();
   res.json({
-    authRequired: Boolean(APP_PASSWORD && APP_PASSWORD.trim().length > 0),
+    authRequired: Boolean(pwd && pwd.length > 0),
     authenticated: checkTokenValid(token),
   });
 });
 
 app.post('/api/auth/login', (req, res) => {
-  if (!APP_PASSWORD) {
+  const pwd = getActivePassword();
+  if (!pwd) {
     return res.json({ success: true, token: 'open' });
   }
 
   const { password } = req.body;
-  if (password === APP_PASSWORD) {
+  if (password === pwd) {
     const token = generateToken();
     return res.json({ success: true, token });
   }
@@ -71,13 +84,96 @@ app.post('/api/auth/login', (req, res) => {
   res.status(401).json({ error: 'Incorrect password' });
 });
 
+// ----------------- ACCOUNT PROFILE MANAGEMENT -----------------
+app.get('/api/account', (req, res) => {
+  const getSetting = (key, fallback) => {
+    try {
+      const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
+      return row ? row.value : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const trackCount = db.prepare('SELECT COUNT(*) as count FROM tracks').get().count;
+  const playlistCount = db.prepare('SELECT COUNT(*) as count FROM playlists').get().count;
+  const likedCount = db.prepare('SELECT COUNT(*) as count FROM tracks WHERE isLiked = 1').get().count;
+  const pwd = getActivePassword();
+
+  res.json({
+    username: getSetting('accountUsername', 'Stebin Raj'),
+    email: getSetting('accountEmail', 'stebin@spotify.local'),
+    avatarColor: getSetting('accountAvatarColor', '#1db954'),
+    streamingQuality: getSetting('streamingQuality', '320 kbps (High Fidelity)'),
+    plan: 'Spotify Personal Cloud Pro',
+    isPasswordProtected: Boolean(pwd && pwd.length > 0),
+    isEnvPasswordLocked: Boolean(APP_PASSWORD && APP_PASSWORD.trim().length > 0),
+    trackCount,
+    playlistCount,
+    likedCount,
+  });
+});
+
+app.post('/api/account', (req, res) => {
+  const { username, email, avatarColor, streamingQuality } = req.body;
+
+  const setSetting = (key, value) => {
+    if (value !== undefined) {
+      db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, String(value));
+    }
+  };
+
+  setSetting('accountUsername', username);
+  setSetting('accountEmail', email);
+  setSetting('accountAvatarColor', avatarColor);
+  setSetting('streamingQuality', streamingQuality);
+
+  res.json({ success: true });
+});
+
+app.post('/api/account/password', (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const activePwd = getActivePassword();
+
+  // If there's already an active password, currentPassword must match
+  if (activePwd && currentPassword !== activePwd) {
+    return res.status(401).json({ error: 'Current password does not match' });
+  }
+
+  if (!newPassword || newPassword.trim().length < 3) {
+    return res.status(400).json({ error: 'New password must be at least 3 characters' });
+  }
+
+  db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('appPassword', newPassword.trim());
+
+  const token = generateToken();
+  res.json({ success: true, message: 'Password updated successfully', token });
+});
+
+app.post('/api/account/remove-password', (req, res) => {
+  const { currentPassword } = req.body;
+  const activePwd = getActivePassword();
+
+  if (APP_PASSWORD) {
+    return res.status(400).json({ error: 'Password is enforced via server environment variable (APP_PASSWORD).' });
+  }
+
+  if (activePwd && currentPassword !== activePwd) {
+    return res.status(401).json({ error: 'Current password does not match' });
+  }
+
+  db.prepare('DELETE FROM settings WHERE key = ?').run('appPassword');
+  res.json({ success: true, message: 'Password protection removed. Server is now in open mode.' });
+});
+
 // Auth protection middleware for API
 app.use('/api', (req, res, next) => {
+  const activePwd = getActivePassword();
   // Free endpoints
   if (
     req.path === '/auth/status' ||
     req.path === '/auth/login' ||
-    !APP_PASSWORD
+    !activePwd
   ) {
     return next();
   }
