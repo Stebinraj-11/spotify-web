@@ -6,9 +6,39 @@ A self-hosted, personal music streaming web application designed for a single us
 
 ## 🌐 Online Hosting & Deployment Guide
 
-This application is fully production-ready for online cloud hosting (Render, Railway, Fly.io, VPS, Docker, or Coolify).
+This application is fully production-ready for **Vercel**, Docker, Render, Railway, Fly.io, or any VPS.
 
-### Option 1: Deploy with Docker / Docker Compose (Recommended for VPS / Cloud)
+### Option 1: Deploy on Vercel (Recommended Serverless)
+
+The repository includes pre-configured [`vercel.json`](./vercel.json) and [`api/index.js`](./api/index.js).
+
+#### Method A: Via GitHub (Easiest)
+1. Push this repository to your GitHub account:
+   ```bash
+   git remote add origin https://github.com/<your-username>/spotify-web-player.git
+   git branch -M main
+   git push -u origin main
+   ```
+2. Go to **[vercel.com](https://vercel.com)** -> Click **Add New...** -> **Project**.
+3. Import your GitHub repository.
+4. Leave settings as default (Framework Preset: **Vite**, Root Directory: `./`).
+5. (Optional) In **Environment Variables**, add `APP_PASSWORD=your_password` to protect your player.
+6. Click **Deploy**!
+
+#### Method B: Via Vercel CLI
+```bash
+npx vercel
+```
+
+*How Vercel Works:*
+- Frontend SPA is served from global edge CDN (`client/dist`).
+- Backend REST API routes are handled by [`api/index.js`](./api/index.js) (Vercel Serverless Function).
+- The pre-populated SQLite database with your 7 Cloudinary tracks is bundled and loaded into `/tmp`.
+- Audio streams automatically redirect to Cloudinary CDN with zero bandwidth bottlenecks or 4.5MB payload limitations.
+
+---
+
+### Option 2: Deploy with Docker / Docker Compose (Recommended for VPS / Cloud)
 
 Run with a single command on any VPS (DigitalOcean, Hetzner, Linode, AWS, etc.):
 
