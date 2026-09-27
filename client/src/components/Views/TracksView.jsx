@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { formatDuration } from '../../utils/formatters';
 
-export function TracksView({ playlists = [], onAddToPlaylist, onOpenAddSong }) {
+export function TracksView({ playlists = [], onAddToPlaylist }) {
   const { playTrack, toggleShuffle } = usePlayer();
   const [tracks, setTracks] = useState([]);
   const [sortBy, setSortBy] = useState('order');
@@ -75,7 +75,7 @@ export function TracksView({ playlists = [], onAddToPlaylist, onOpenAddSong }) {
           </p>
         </div>
 
-        {/* Play, Shuffle & Add Song buttons */}
+        {/* Play & Shuffle buttons */}
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button
             onClick={handlePlayAll}
@@ -94,17 +94,6 @@ export function TracksView({ playlists = [], onAddToPlaylist, onOpenAddSong }) {
           >
             <Shuffle className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
-
-          {onOpenAddSong && (
-            <button
-              onClick={onOpenAddSong}
-              className="h-11 sm:h-12 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition active:scale-95 border border-white/10"
-              title="Add Song"
-            >
-              <Music className="w-4 h-4 text-[#1db954]" />
-              <span>Add Song</span>
-            </button>
-          )}
         </div>
       </div>
 
@@ -154,7 +143,7 @@ export function TracksView({ playlists = [], onAddToPlaylist, onOpenAddSong }) {
       ) : tracks.length === 0 ? (
         <div className="py-20 text-center text-neutral-500 text-sm">
           <Music className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          No songs found. Scan your local music folder or add songs from direct URL.
+          No songs found.
         </div>
       ) : (
         <TrackList

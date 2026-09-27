@@ -5,7 +5,6 @@ import {
   Play,
   Shuffle,
   Music,
-  Plus,
   Search,
   Sparkles,
   ArrowUpDown,
@@ -17,7 +16,6 @@ import { formatDuration } from '../../utils/formatters';
 export function HomeView({
   onNavigate,
   onOpenAccount,
-  onOpenAddSong,
   playlists = [],
   onAddToPlaylist,
 }) {
@@ -94,7 +92,7 @@ export function HomeView({
           </p>
         </div>
 
-        {/* Action Buttons: Play All, Shuffle, + Add Song */}
+        {/* Action Buttons: Play All, Shuffle */}
         <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
           <button
             onClick={handlePlayAll}
@@ -113,15 +111,6 @@ export function HomeView({
             title="Shuffle play"
           >
             <Shuffle className="w-4 h-4 sm:w-5 sm:h-5" />
-          </button>
-
-          <button
-            onClick={onOpenAddSong}
-            className="h-11 sm:h-12 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition active:scale-95 border border-white/10"
-            title="Add Song"
-          >
-            <Plus className="w-4 h-4 text-[#1db954]" />
-            <span>Add Song</span>
           </button>
         </div>
       </div>
@@ -176,7 +165,7 @@ export function HomeView({
           <Music className="w-12 h-12 mx-auto text-neutral-600" />
           <p className="font-semibold text-white">No songs found</p>
           <p className="text-xs text-neutral-400 max-w-sm mx-auto">
-            {searchFilter ? 'No songs match your search query.' : 'Click "Add Song" above to add your favorite tracks.'}
+            {searchFilter ? 'No songs match your search query.' : 'No songs available in your library.'}
           </p>
           {searchFilter && (
             <button
