@@ -8,6 +8,7 @@ import { AudioVisualizer } from './components/AudioVisualizer';
 import { QueueDrawer } from './components/QueueDrawer';
 import { ExpandedNowPlaying } from './components/ExpandedNowPlaying';
 import { AccountModal } from './components/AccountModal';
+import { AddSongModal } from './components/AddSongModal';
 import { LoginModal } from './components/LoginModal';
 import { getAuthToken, setAuthToken } from './utils/api';
 
@@ -48,8 +49,16 @@ function MainApp() {
 
   // Modals & Drawers
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isAddSongOpen, setIsAddSongOpen] = useState(false);
+  const [tracksRevision, setTracksRevision] = useState(0);
   const [accountUser, setAccountUser] = useState('Stebin');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  const handleSongAdded = (newTrack) => {
+    setTracksRevision((prev) => prev + 1);
+    fetchPlaylists();
+    fetchAccountInfo();
+  };
 
   // Check server auth status on load
   const checkAuth = async () => {
@@ -208,6 +217,7 @@ function MainApp() {
           onCreatePlaylist={handleCreatePlaylist}
           onDeletePlaylist={handleDeletePlaylist}
           onOpenAccount={() => setIsAccountOpen(true)}
+          onOpenAddSong={() => setIsAddSongOpen(true)}
           isMobileOpen={isMobileSidebarOpen}
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
@@ -250,7 +260,7 @@ function MainApp() {
               <button
                 onClick={() => setIsAccountOpen(true)}
                 className="flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition active:scale-95 border border-white/10 shadow-sm"
-                title="Account & Login Settings"
+                title="Account Settings"
               >
                 <div className="w-6 h-6 rounded-full bg-[#1db954] flex items-center justify-center text-black font-black text-xs">
                   {accountUser ? accountUser[0].toUpperCase() : 'S'}
@@ -274,8 +284,12 @@ function MainApp() {
           <div className="flex-1 overflow-y-auto pb-36 md:pb-8">
             {currentView.type === 'home' && (
               <HomeView
+                key={`home-${tracksRevision}`}
                 onNavigate={navigateTo}
                 onOpenAccount={() => setIsAccountOpen(true)}
+                onOpenAddSong={() => setIsAddSongOpen(true)}
+                playlists={playlists}
+                onAddToPlaylist={handleAddToPlaylist}
               />
             )}
 
@@ -289,8 +303,10 @@ function MainApp() {
 
             {currentView.type === 'tracks' && (
               <TracksView
+                key={`tracks-${tracksRevision}`}
                 playlists={playlists}
                 onAddToPlaylist={handleAddToPlaylist}
+                onOpenAddSong={() => setIsAddSongOpen(true)}
               />
             )}
 
@@ -359,10 +375,14 @@ function MainApp() {
         }}
         onOpenVisualizer={() => {
           setIsAccountOpen(false);
-          setIsVisualizerOpen(true);
         }}
         onLockSession={handleLogout}
         isAuthRequired={isAuthRequired}
+      />
+      <AddSongModal
+        isOpen={isAddSongOpen}
+        onClose={() => setIsAddSongOpen(false)}
+        onSongAdded={handleSongAdded}
       />
     </div>
   );

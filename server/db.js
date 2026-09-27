@@ -441,6 +441,11 @@ export function initDatabase() {
         VALUES (?, ?, ?, ?)
       `).run(plId, 'b81b60e6a77802b5', 1, now);
     }
+
+    // Ensure all tracks have sequential trackNumber order (1..18+)
+    const allTracks = db.prepare('SELECT rowid, id FROM tracks ORDER BY rowid ASC').all();
+    const updateStmt = db.prepare('UPDATE tracks SET trackNumber = ? WHERE id = ?');
+    allTracks.forEach((t, idx) => updateStmt.run(idx + 1, t.id));
   });
 
   try {

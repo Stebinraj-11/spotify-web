@@ -48,14 +48,14 @@ export function TrackList({
 
   return (
     <div className="w-full">
-      {/* Desktop Table Header (Hidden on Mobile) */}
-      <div className="hidden md:grid grid-cols-[16px_4fr_3fr_2fr_minmax(120px,1fr)] gap-4 px-4 py-2 border-b border-white/10 text-xs font-semibold uppercase tracking-wider text-neutral-400 select-none items-center">
-        <span className="text-center">#</span>
+      {/* Table Header: Shows # on desktop and mobile */}
+      <div className="grid grid-cols-[28px_1fr_auto] md:grid-cols-[28px_4fr_3fr_2fr_minmax(120px,1fr)] gap-2.5 md:gap-4 px-2.5 md:px-4 py-2 border-b border-white/10 text-xs font-semibold uppercase tracking-wider text-neutral-400 select-none items-center">
+        <span className="text-center font-mono">#</span>
         <span>Title</span>
-        {showAlbum && <span>Album</span>}
-        {showDateAdded && <span>Date Added</span>}
+        {showAlbum && <span className="hidden md:block">Album</span>}
+        {showDateAdded && <span className="hidden md:block">Date Added</span>}
         <div className="flex items-center justify-end gap-2 pr-2">
-          <Clock className="w-4 h-4" />
+          <Clock className="w-4 h-4 hidden sm:block" />
         </div>
       </div>
 
@@ -64,17 +64,18 @@ export function TrackList({
         {tracks.map((track, index) => {
           const isCurrent = currentTrack && currentTrack.id === track.id;
           const isRowPlaying = isCurrent && isPlaying;
+          const displayOrder = track.trackNumber || (index + 1);
 
           return (
             <div
               key={`${track.id}-${index}`}
               onClick={() => handleRowClick(track, index)}
-              className={`group flex md:grid md:grid-cols-[16px_4fr_3fr_2fr_minmax(120px,1fr)] gap-3 md:gap-4 px-3 md:px-4 py-2.5 rounded-lg hover:bg-white/10 transition cursor-pointer items-center select-none active:bg-white/15 ${
+              className={`group flex items-center md:grid md:grid-cols-[28px_4fr_3fr_2fr_minmax(120px,1fr)] gap-2.5 md:gap-4 px-2.5 md:px-4 py-2.5 rounded-lg hover:bg-white/10 transition cursor-pointer select-none active:bg-white/15 ${
                 isCurrent ? 'bg-white/5' : ''
               }`}
             >
-              {/* Desktop Column 1: # or Play/Pause Button */}
-              <div className="hidden md:flex items-center justify-center text-sm font-mono text-neutral-400">
+              {/* Column 1: Track Number (# 1..18) or Animated Equalizer or Play/Pause Button */}
+              <div className="w-7 flex-shrink-0 flex items-center justify-center text-xs sm:text-sm font-mono text-neutral-400">
                 <span className="group-hover:hidden">
                   {isRowPlaying ? (
                     <div className="flex items-end gap-0.5 h-3.5">
@@ -83,9 +84,9 @@ export function TrackList({
                       <div className="w-0.5 bg-[#1db954] animate-pulse h-1.5" />
                     </div>
                   ) : isCurrent ? (
-                    <span className="text-[#1db954] font-bold">{index + 1}</span>
+                    <span className="text-[#1db954] font-bold">{displayOrder}</span>
                   ) : (
-                    index + 1
+                    <span>{displayOrder}</span>
                   )}
                 </span>
                 <button
@@ -93,9 +94,9 @@ export function TrackList({
                   title={isRowPlaying ? 'Pause' : 'Play'}
                 >
                   {isRowPlaying ? (
-                    <Pause className="w-4 h-4 fill-white" />
+                    <Pause className="w-3.5 h-3.5 fill-white" />
                   ) : (
-                    <Play className="w-4 h-4 fill-white" />
+                    <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
                   )}
                 </button>
               </div>

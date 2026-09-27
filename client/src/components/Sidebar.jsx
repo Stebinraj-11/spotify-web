@@ -19,6 +19,7 @@ export function Sidebar({
   onCreatePlaylist,
   onDeletePlaylist,
   onOpenAccount,
+  onOpenAddSong,
   isMobileOpen,
   onCloseMobile,
 }) {
@@ -67,9 +68,6 @@ export function Sidebar({
             </div>
             <div>
               <span className="text-base font-bold text-white tracking-tight">Spotify</span>
-              <span className="text-[10px] bg-white/10 text-neutral-300 font-mono px-1.5 py-0.5 rounded ml-1.5 uppercase">
-                Self-Hosted
-              </span>
             </div>
           </div>
 
@@ -99,13 +97,23 @@ export function Sidebar({
               <Library className="w-5 h-5" />
               <span>Your Library</span>
             </div>
-            <button
-              onClick={() => setIsCreating(true)}
-              className="p-1 rounded-full hover:bg-white/10 hover:text-white transition"
-              title="Create Playlist"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={onOpenAddSong}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1db954] hover:text-black text-white text-xs font-semibold transition active:scale-95 shadow-sm"
+                title="Add Song to Library"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Song</span>
+              </button>
+              <button
+                onClick={() => setIsCreating(true)}
+                className="p-1.5 rounded-full hover:bg-white/10 hover:text-white transition text-neutral-400"
+                title="Create Playlist"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Library Sub-navigation Pills */}
@@ -157,8 +165,23 @@ export function Sidebar({
             </form>
           )}
 
-          {/* Pinned Playlists: Liked Songs */}
+          {/* Pinned Playlists: Liked Songs & Add Song */}
           <div className="mt-2 space-y-1">
+            <button
+              onClick={onOpenAddSong}
+              className="w-full flex items-center gap-3 p-2 rounded-lg transition text-left group hover:bg-white/5"
+            >
+              <div className="w-10 h-10 rounded-md bg-[#1db954]/20 border border-[#1db954]/40 flex items-center justify-center flex-shrink-0 shadow-md group-hover:bg-[#1db954] transition">
+                <Plus className="w-5 h-5 text-[#1db954] group-hover:text-black transition" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-white truncate group-hover:text-[#1db954] transition">
+                  Add Song
+                </p>
+                <p className="text-xs text-neutral-400">Import audio URL</p>
+              </div>
+            </button>
+
             <button
               onClick={() => onNavigate('liked')}
               className={`w-full flex items-center gap-3 p-2 rounded-lg transition text-left group ${

@@ -104,8 +104,8 @@ app.get('/api/account', (req, res) => {
     username: getSetting('accountUsername', 'Stebin Raj'),
     email: getSetting('accountEmail', 'stebin@spotify.local'),
     avatarColor: getSetting('accountAvatarColor', '#1db954'),
-    streamingQuality: getSetting('streamingQuality', '320 kbps (High Fidelity)'),
-    plan: 'Spotify Personal Cloud Pro',
+    streamingQuality: getSetting('streamingQuality', 'Very High (320 kbps)'),
+    plan: 'Spotify Premium',
     isPasswordProtected: Boolean(pwd && pwd.length > 0),
     isEnvPasswordLocked: Boolean(APP_PASSWORD && APP_PASSWORD.trim().length > 0),
     trackCount,
@@ -188,7 +188,7 @@ app.use('/api', (req, res, next) => {
 
 // ----------------- TRACKS -----------------
 app.get('/api/tracks', (req, res) => {
-  const { q, sort = 'dateAdded', order = 'desc', genre, liked, album, artist } = req.query;
+  const { q, sort = 'order', order = 'asc', genre, liked, album, artist } = req.query;
 
   let query = 'SELECT * FROM tracks WHERE 1=1';
   const params = [];
@@ -219,6 +219,7 @@ app.get('/api/tracks', (req, res) => {
   }
 
   const validSorts = {
+    order: 'COALESCE(trackNumber, rowid)',
     title: 'title COLLATE NOCASE',
     artist: 'artist COLLATE NOCASE',
     album: 'album COLLATE NOCASE',
@@ -226,11 +227,11 @@ app.get('/api/tracks', (req, res) => {
     durationSec: 'durationSec',
     year: 'year',
     playCount: 'playCount',
-    trackNumber: 'trackNumber',
+    trackNumber: 'COALESCE(trackNumber, rowid)',
   };
 
-  const sortCol = validSorts[sort] || 'dateAdded';
-  const sortOrder = order.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+  const sortCol = validSorts[sort] || 'COALESCE(trackNumber, rowid)';
+  const sortOrder = order.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
   query += ` ORDER BY ${sortCol} ${sortOrder}`;
 
   const tracks = db.prepare(query).all(...params);
@@ -241,6 +242,75 @@ app.get('/api/tracks/:id', (req, res) => {
   const track = db.prepare('SELECT * FROM tracks WHERE id = ?').get(req.params.id);
   if (!track) return res.status(404).json({ error: 'Track not found' });
   res.json(track);
+});
+
+app.post('/api/tracks', (req, res) => {
+  const { title, artist, album, audioUrl, albumArtPath, genre, year, durationSec } = req.body;
+  if (!title || !title.trim()) {
+    return res.status(400).json({ error: 'Song title is required' });
+  }
+  if (!audioUrl || !audioUrl.trim()) {
+    return res.status(400).json({ error: 'Audio URL is required' });
+  }
+
+  const id = crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+  const now = new Date().toISOString();
+  const cleanUrl = audioUrl.trim();
+  const filePath = cleanUrl.split('/').pop() || `${id}.mp3`;
+
+  try {
+    const maxRow = db.prepare('SELECT MAX(trackNumber) as maxNum FROM tracks').get();
+    const nextTrackNum = (maxRow && maxRow.maxNum ? maxRow.maxNum : 0) + 1;
+
+    const insert = db.prepare(`
+      INSERT INTO tracks (
+        id, filePath, title, artist, album, albumArtist, genre, year,
+        durationSec, trackNumber, albumArtPath, fileSize, format, originalUrl,
+        mtime, dateAdded, isLiked
+      ) VALUES (
+        ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?,
+        ?, ?, ?
+      )
+    `);
+
+    insert.run(
+      id,
+      filePath,
+      title.trim(),
+      (artist && artist.trim()) || 'Unknown Artist',
+      (album && album.trim()) || 'Single',
+      (artist && artist.trim()) || 'Unknown Artist',
+      (genre && genre.trim()) || 'Pop',
+      year ? parseInt(year, 10) : new Date().getFullYear(),
+      durationSec ? parseFloat(durationSec) : 210,
+      nextTrackNum,
+      (albumArtPath && albumArtPath.trim()) || null,
+      5000000,
+      'mp3',
+      cleanUrl,
+      Date.now(),
+      now,
+      0
+    );
+
+    const newTrack = db.prepare('SELECT * FROM tracks WHERE id = ?').get(id);
+    res.status(201).json(newTrack);
+  } catch (err) {
+    console.error('Add track error:', err);
+    res.status(500).json({ error: 'Failed to add track: ' + err.message });
+  }
+});
+
+app.delete('/api/tracks/:id', (req, res) => {
+  const { id } = req.params;
+  try {
+    db.prepare('DELETE FROM playlist_tracks WHERE trackId = ?').run(id);
+    db.prepare('DELETE FROM tracks WHERE id = ?').run(id);
+    res.json({ success: true, id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.patch('/api/tracks/:id/like', (req, res) => {

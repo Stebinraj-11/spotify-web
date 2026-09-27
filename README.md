@@ -1,6 +1,6 @@
-# 🎵 Spotify - Self-Hosted Personal Music Streaming Web App
+# 🎵 Spotify - Personal Music Streaming Web App
 
-A self-hosted, personal music streaming web application designed for a single user, heavily inspired by Spotify's iconic UI/UX.
+A clean, personal music streaming web application designed for mobile and desktop, heavily inspired by Spotify's iconic UI/UX.
 
 ---
 

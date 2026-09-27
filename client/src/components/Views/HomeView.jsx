@@ -1,38 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { usePlayer } from '../../context/PlayerContext';
+import { TrackList } from '../TrackList';
 import {
   Play,
-  Pause,
+  Shuffle,
+  Music,
+  Plus,
+  Search,
   Sparkles,
-  Music2,
-  User,
-  Disc3,
-  Users,
-  ChevronRight,
+  ArrowUpDown,
+  ListMusic,
+  Heart,
 } from 'lucide-react';
+import { formatDuration } from '../../utils/formatters';
 
-export function HomeView({ onNavigate, onOpenAccount }) {
-  const { playTrack, currentTrack, isPlaying, togglePlay } = usePlayer();
-  const [recentTracks, setRecentTracks] = useState([]);
-  const [albums, setAlbums] = useState([]);
-  const [artists, setArtists] = useState([]);
+export function HomeView({
+  onNavigate,
+  onOpenAccount,
+  onOpenAddSong,
+  playlists = [],
+  onAddToPlaylist,
+}) {
+  const { playTrack, toggleShuffle } = usePlayer();
+  const [tracks, setTracks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchFilter, setSearchFilter] = useState('');
+  const [sortBy, setSortBy] = useState('order');
+  const [sortOrder, setSortOrder] = useState('asc');
+
+  const fetchTracks = () => {
+    setLoading(true);
+    let url = `/api/tracks?sort=${sortBy}&order=${sortOrder}`;
+    if (searchFilter.trim()) {
+      url += `&q=${encodeURIComponent(searchFilter.trim())}`;
+    }
+
+    fetch(url)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setTracks(data);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Fetch home tracks error:', err);
+        setLoading(false);
+      });
+  };
 
   useEffect(() => {
-    fetch('/api/tracks?sort=dateAdded&order=desc')
-      .then((r) => r.json())
-      .then((data) => setRecentTracks(data.slice(0, 8)))
-      .catch(console.warn);
-
-    fetch('/api/albums')
-      .then((r) => r.json())
-      .then((data) => setAlbums(data.slice(0, 6)))
-      .catch(console.warn);
-
-    fetch('/api/artists')
-      .then((r) => r.json())
-      .then((data) => setArtists(data.slice(0, 6)))
-      .catch(console.warn);
-  }, []);
+    fetchTracks();
+  }, [sortBy, sortOrder, searchFilter]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -41,166 +60,139 @@ export function HomeView({ onNavigate, onOpenAccount }) {
     return 'Good evening';
   };
 
-  const handlePlayCard = (track, list) => {
-    if (currentTrack && currentTrack.id === track.id) {
-      togglePlay();
-    } else {
-      playTrack(track, list);
+  const handlePlayAll = () => {
+    if (tracks.length > 0) {
+      playTrack(tracks[0], tracks, 0);
     }
   };
 
+  const handleShuffleAll = () => {
+    if (tracks.length > 0) {
+      toggleShuffle();
+      const randomIndex = Math.floor(Math.random() * tracks.length);
+      playTrack(tracks[randomIndex], tracks, randomIndex);
+    }
+  };
+
+  const totalDuration = tracks.reduce((sum, t) => sum + (t.durationSec || 0), 0);
+
   return (
-    <div className="p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8 animate-in fade-in duration-300">
-      {/* Top Greeting */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          {getGreeting()}
-        </h1>
+    <div className="p-4 sm:p-6 md:p-8 space-y-5 md:space-y-6 animate-in fade-in duration-300">
+      {/* Top Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+        <div>
+          <span className="text-[11px] uppercase tracking-wider text-neutral-400 font-semibold flex items-center gap-1.5">
+            <span>{getGreeting()}</span>
+            <span>•</span>
+            <span className="text-[#1db954]">{tracks.length} Songs</span>
+          </span>
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mt-0.5">
+            All Songs
+          </h1>
+          <p className="text-xs text-neutral-400 mt-1">
+            Order-wise music library • {formatDuration(totalDuration)} total listening
+          </p>
+        </div>
+
+        {/* Action Buttons: Play All, Shuffle, + Add Song */}
+        <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+          <button
+            onClick={handlePlayAll}
+            disabled={tracks.length === 0}
+            className="h-11 sm:h-12 px-5 sm:px-6 rounded-full bg-[#1db954] hover:bg-[#1ed760] disabled:opacity-40 text-black font-bold text-xs sm:text-sm flex items-center gap-2 transition shadow-lg active:scale-95"
+            title="Play from start (#1)"
+          >
+            <Play className="w-5 h-5 fill-black ml-0.5" />
+            <span>Play All</span>
+          </button>
+
+          <button
+            onClick={handleShuffleAll}
+            disabled={tracks.length === 0}
+            className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition disabled:opacity-40 active:scale-95"
+            title="Shuffle play"
+          >
+            <Shuffle className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+
+          <button
+            onClick={onOpenAddSong}
+            className="h-11 sm:h-12 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition active:scale-95 border border-white/10"
+            title="Add Song"
+          >
+            <Plus className="w-4 h-4 text-[#1db954]" />
+            <span>Add Song</span>
+          </button>
+        </div>
       </div>
 
-      {/* Cloud & Remote Library Banner */}
-      {recentTracks.length === 0 ? (
-        <div className="rounded-2xl p-6 sm:p-8 bg-gradient-to-r from-emerald-900/40 via-neutral-900 to-purple-900/30 border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
-          <div className="space-y-2 max-w-xl text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1db954]/20 text-[#1db954] text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Self-Hosted Personal Music Streaming</span>
-            </div>
-            <h2 className="text-2xl font-bold text-white">Your Library is Ready to Stream</h2>
-            <p className="text-sm text-neutral-300">
-              Add audio files from your local folder or import remote tracks from Cloudinary with 1 click to start enjoying your music.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 flex-wrap justify-center">
+      {/* Filter & Sort Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
+        {/* Search input filter */}
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+          <input
+            type="text"
+            value={searchFilter}
+            onChange={(e) => setSearchFilter(e.target.value)}
+            placeholder="Search all songs or artists..."
+            className="w-full pl-10 pr-3.5 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#1db954] transition"
+          />
+        </div>
+
+        {/* Sort Controls */}
+        <div className="flex items-center justify-between sm:justify-end gap-2 text-xs text-neutral-400">
+          <ArrowUpDown className="w-3.5 h-3.5" />
+          <span>Sort:</span>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-neutral-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#1db954]"
+          >
+            <option value="order">Order (# 1..18)</option>
+            <option value="title">Title (A-Z)</option>
+            <option value="artist">Artist</option>
+            <option value="durationSec">Duration</option>
+            <option value="dateAdded">Recently Added</option>
+          </select>
+
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-mono uppercase text-[10px] border border-white/10"
+          >
+            {sortOrder}
+          </button>
+        </div>
+      </div>
+
+      {/* Songs List (Rendered cleanly order-wise) */}
+      {loading ? (
+        <div className="py-20 text-center text-neutral-500 text-sm">
+          <div className="w-8 h-8 rounded-full border-2 border-[#1db954] border-t-transparent animate-spin mx-auto mb-3" />
+          <span>Loading songs...</span>
+        </div>
+      ) : tracks.length === 0 ? (
+        <div className="py-20 text-center text-neutral-400 text-sm space-y-3">
+          <Music className="w-12 h-12 mx-auto text-neutral-600" />
+          <p className="font-semibold text-white">No songs found</p>
+          <p className="text-xs text-neutral-400 max-w-sm mx-auto">
+            {searchFilter ? 'No songs match your search query.' : 'Click "Add Song" above to add your favorite tracks.'}
+          </p>
+          {searchFilter && (
             <button
-              onClick={onOpenAccount}
-              className="px-5 py-3 rounded-full bg-[#1db954] hover:bg-[#1ed760] text-black font-bold text-sm flex items-center gap-2 transition shadow-lg transform hover:scale-105"
+              onClick={() => setSearchFilter('')}
+              className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold"
             >
-              <User className="w-4 h-4" />
-              <span>Account & Settings</span>
+              Clear Search
             </button>
-          </div>
+          )}
         </div>
-      ) : null}
-
-      {/* Quick Play Grid (Top 6 Recents) */}
-      {recentTracks.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {recentTracks.slice(0, 6).map((track) => {
-            const isThisPlaying = currentTrack?.id === track.id && isPlaying;
-            return (
-              <div
-                key={track.id}
-                onClick={() => handlePlayCard(track, recentTracks)}
-                className="group flex items-center bg-white/5 hover:bg-white/10 rounded-md overflow-hidden cursor-pointer transition select-none relative"
-              >
-                <div className="w-16 h-16 bg-neutral-800 flex-shrink-0 flex items-center justify-center text-neutral-400">
-                  {track.albumArtPath ? (
-                    <img src={track.albumArtPath} alt={track.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <Music2 className="w-6 h-6" />
-                  )}
-                </div>
-                <div className="px-3 md:px-4 flex-1 min-w-0">
-                  <p className="text-sm font-bold text-white truncate">{track.title}</p>
-                  <p className="text-xs text-neutral-400 truncate">{track.artist}</p>
-                </div>
-                <button
-                  className={`w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#1db954] text-black flex items-center justify-center mr-3 md:mr-4 shadow-lg transition-all duration-200 transform ${
-                    isThisPlaying
-                      ? 'opacity-100 scale-100'
-                      : 'opacity-90 md:opacity-0 md:scale-75 md:group-hover:opacity-100 md:group-hover:scale-100'
-                  }`}
-                >
-                  {isThisPlaying ? (
-                    <Pause className="w-4 h-4 md:w-5 md:h-5 fill-black" />
-                  ) : (
-                    <Play className="w-4 h-4 md:w-5 md:h-5 fill-black ml-0.5" />
-                  )}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Albums Section */}
-      {albums.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white">Albums</h2>
-            <button
-              onClick={() => onNavigate('albums')}
-              className="text-xs font-semibold text-neutral-400 hover:text-white flex items-center gap-1 transition"
-            >
-              <span>Show all</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {albums.map((album, i) => (
-              <div
-                key={i}
-                onClick={() => onNavigate('album-detail', { name: album.name })}
-                className="group p-3 sm:p-4 bg-[#181818] hover:bg-[#282828] rounded-xl transition duration-300 cursor-pointer flex flex-col"
-              >
-                <div className="w-full aspect-square rounded-lg bg-neutral-800 overflow-hidden mb-3 relative shadow-md">
-                  {album.albumArtPath ? (
-                    <img src={album.albumArtPath} alt={album.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-700 to-neutral-900 text-neutral-400">
-                      <Disc3 className="w-12 h-12" />
-                    </div>
-                  )}
-                </div>
-                <h3 className="text-sm font-bold text-white truncate">{album.name}</h3>
-                <p className="text-xs text-neutral-400 truncate mt-1">{album.artist}</p>
-                <span className="text-[11px] text-neutral-500 font-mono mt-1">
-                  {album.trackCount} {album.trackCount === 1 ? 'song' : 'songs'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Artists Section */}
-      {artists.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white">Artists</h2>
-            <button
-              onClick={() => onNavigate('artists')}
-              className="text-xs font-semibold text-neutral-400 hover:text-white flex items-center gap-1 transition"
-            >
-              <span>Show all</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {artists.map((artist, i) => (
-              <div
-                key={i}
-                onClick={() => onNavigate('artist-detail', { name: artist.name })}
-                className="group p-3 sm:p-4 bg-[#181818] hover:bg-[#282828] rounded-xl transition duration-300 cursor-pointer flex flex-col items-center text-center"
-              >
-                <div className="w-full aspect-square rounded-full bg-neutral-800 overflow-hidden mb-3 relative shadow-md">
-                  {artist.albumArtPath ? (
-                    <img src={artist.albumArtPath} alt={artist.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-700 to-neutral-900 text-neutral-400">
-                      <Users className="w-12 h-12" />
-                    </div>
-                  )}
-                </div>
-                <h3 className="text-sm font-bold text-white truncate w-full">{artist.name}</h3>
-                <p className="text-xs text-neutral-400 truncate mt-1">Artist</p>
-              </div>
-            ))}
-          </div>
-        </div>
+      ) : (
+        <TrackList
+          tracks={tracks}
+          playlists={playlists}
+          onAddToPlaylist={onAddToPlaylist}
+        />
       )}
     </div>
   );

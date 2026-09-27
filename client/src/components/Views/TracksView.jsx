@@ -10,11 +10,11 @@ import {
 } from 'lucide-react';
 import { formatDuration } from '../../utils/formatters';
 
-export function TracksView({ playlists = [], onAddToPlaylist }) {
+export function TracksView({ playlists = [], onAddToPlaylist, onOpenAddSong }) {
   const { playTrack, toggleShuffle } = usePlayer();
   const [tracks, setTracks] = useState([]);
-  const [sortBy, setSortBy] = useState('dateAdded');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [sortBy, setSortBy] = useState('order');
+  const [sortOrder, setSortOrder] = useState('asc');
   const [searchFilter, setSearchFilter] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +28,9 @@ export function TracksView({ playlists = [], onAddToPlaylist }) {
     fetch(url)
       .then((r) => r.json())
       .then((data) => {
-        setTracks(data);
+        if (Array.isArray(data)) {
+          setTracks(data);
+        }
         setLoading(false);
       })
       .catch((err) => {
@@ -60,7 +62,7 @@ export function TracksView({ playlists = [], onAddToPlaylist }) {
   return (
     <div className="p-4 sm:p-6 md:p-8 space-y-5 md:space-y-6 animate-in fade-in duration-300">
       {/* Header Banner */}
-      <div className="flex items-center justify-between gap-4 pb-4 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
         <div>
           <span className="text-[10px] sm:text-xs uppercase tracking-widest text-neutral-400 font-semibold">
             Library
@@ -73,24 +75,36 @@ export function TracksView({ playlists = [], onAddToPlaylist }) {
           </p>
         </div>
 
-        {/* Play & Shuffle buttons */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        {/* Play, Shuffle & Add Song buttons */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button
             onClick={handlePlayAll}
             disabled={tracks.length === 0}
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#1db954] hover:bg-[#1ed760] disabled:opacity-40 text-black flex items-center justify-center transition shadow-lg active:scale-95"
+            className="h-11 sm:h-12 px-5 sm:px-6 rounded-full bg-[#1db954] hover:bg-[#1ed760] disabled:opacity-40 text-black font-bold text-xs sm:text-sm flex items-center gap-2 transition shadow-lg active:scale-95"
             title="Play All"
           >
-            <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-black ml-0.5" />
+            <Play className="w-5 h-5 fill-black ml-0.5" />
+            <span>Play All</span>
           </button>
           <button
             onClick={handleShuffleAll}
             disabled={tracks.length === 0}
-            className="p-2.5 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition disabled:opacity-40 active:scale-95"
+            className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition disabled:opacity-40 active:scale-95"
             title="Shuffle"
           >
             <Shuffle className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
+
+          {onOpenAddSong && (
+            <button
+              onClick={onOpenAddSong}
+              className="h-11 sm:h-12 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition active:scale-95 border border-white/10"
+              title="Add Song"
+            >
+              <Music className="w-4 h-4 text-[#1db954]" />
+              <span>Add Song</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -117,11 +131,12 @@ export function TracksView({ playlists = [], onAddToPlaylist }) {
             onChange={(e) => setSortBy(e.target.value)}
             className="bg-neutral-900 border border-white/10 rounded-md px-2 py-1 text-xs text-white focus:outline-none focus:border-[#1db954]"
           >
-            <option value="dateAdded">Date Added</option>
-            <option value="title">Title</option>
+            <option value="order">Order (# 1..18)</option>
+            <option value="title">Title (A-Z)</option>
             <option value="artist">Artist</option>
-            <option value="album">Album</option>
             <option value="durationSec">Duration</option>
+            <option value="dateAdded">Date Added</option>
+            <option value="album">Album</option>
           </select>
 
           <button
