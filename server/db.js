@@ -425,7 +425,11 @@ export function initDatabase() {
       `).run(plId, 'b81b60e6a77802b5', 1, now);
     }
 
-    // Ensure all tracks have sequential trackNumber order (1..18+)
+    // Explicitly purge removed tracks (such as Sneaky)
+    db.prepare("DELETE FROM tracks WHERE title LIKE '%Sneaky%' OR id = '549c296b26bddb49'").run();
+    db.prepare("DELETE FROM playlist_tracks WHERE trackId = '549c296b26bddb49'").run();
+
+    // Ensure all tracks have sequential trackNumber order (1..17+)
     const allTracks = db.prepare('SELECT rowid, id FROM tracks ORDER BY rowid ASC').all();
     const updateStmt = db.prepare('UPDATE tracks SET trackNumber = ? WHERE id = ?');
     allTracks.forEach((t, idx) => updateStmt.run(idx + 1, t.id));
@@ -433,6 +437,11 @@ export function initDatabase() {
 
   try {
     seedTx();
+    try {
+      db.pragma('wal_checkpoint(TRUNCATE)');
+    } catch {
+      // ignore
+    }
     console.log('[DB] Synchronized seed tracks');
   } catch (err) {
     console.warn('[DB] Seed error:', err.message);
