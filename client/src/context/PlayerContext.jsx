@@ -24,6 +24,9 @@ export function PlayerProvider({ children }) {
   const [isVisualizerOpen, setIsVisualizerOpen] = useState(false);
   const [isQueueOpen, setIsQueueOpen] = useState(false);
   const [isExpandedNowPlaying, setIsExpandedNowPlaying] = useState(false);
+  const [isNowPlayingPanelOpen, setIsNowPlayingPanelOpen] = useState(false);
+  const [isLyricsOpen, setIsLyricsOpen] = useState(false);
+  const [isDevicePickerOpen, setIsDevicePickerOpen] = useState(false);
 
   // Equalizer gains in dB (-12 to +12)
   const [eqGains, setEqGains] = useState({ bass: 0, mid: 0, treble: 0 });
@@ -324,6 +327,9 @@ export function PlayerProvider({ children }) {
         isVisualizerOpen,
         isQueueOpen,
         isExpandedNowPlaying,
+        isNowPlayingPanelOpen,
+        isLyricsOpen,
+        isDevicePickerOpen,
         eqGains,
         playTrack,
         togglePlay,
@@ -342,6 +348,9 @@ export function PlayerProvider({ children }) {
         setIsVisualizerOpen,
         setIsQueueOpen,
         setIsExpandedNowPlaying,
+        setIsNowPlayingPanelOpen,
+        setIsLyricsOpen,
+        setIsDevicePickerOpen,
         updateEqGain,
       }}
     >

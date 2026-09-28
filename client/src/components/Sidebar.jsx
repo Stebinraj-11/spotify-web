@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import {
-  Home,
-  Search,
   Library,
+  Plus,
+  ArrowRight,
+  Search,
+  ListFilter,
+  LayoutGrid,
+  List,
+  Pin,
+  Heart,
   Music,
   Disc3,
   Users,
-  Heart,
-  Plus,
-  Settings,
   Trash2,
-  Sparkles,
+  Volume2,
+  FolderPlus,
+  ListPlus,
 } from 'lucide-react';
+import { usePlayer } from '../context/PlayerContext';
 
 export function Sidebar({
   currentView,
@@ -23,8 +29,14 @@ export function Sidebar({
   isMobileOpen,
   onCloseMobile,
 }) {
-  const [newPlaylistName, setNewPlaylistName] = useState('');
+  const { currentTrack, isPlaying } = usePlayer();
+  const [filterType, setFilterType] = useState('all'); // 'all' | 'playlists' | 'artists' | 'albums'
+  const [librarySearch, setLibrarySearch] = useState('');
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
+  const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState('');
 
   const handleCreateSubmit = (e) => {
     e.preventDefault();
@@ -32,14 +44,16 @@ export function Sidebar({
     onCreatePlaylist(newPlaylistName.trim());
     setNewPlaylistName('');
     setIsCreating(false);
+    setIsPlusMenuOpen(false);
   };
 
-  const navItemClass = (active) =>
-    `group flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 select-none ${
-      active
-        ? 'text-white bg-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.12)] border border-white/[0.08]'
-        : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
-    }`;
+  const filteredPlaylists = playlists.filter((pl) => {
+    if (filterType === 'artists' || filterType === 'albums') return false;
+    if (librarySearch.trim()) {
+      return pl.name.toLowerCase().includes(librarySearch.toLowerCase());
+    }
+    return true;
+  });
 
   return (
     <>
@@ -47,197 +61,274 @@ export function Sidebar({
       {isMobileOpen && (
         <div
           onClick={onCloseMobile}
-          className="fixed inset-0 bg-black/70 backdrop-blur-md z-40 md:hidden animate-in fade-in duration-200"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-40 md:hidden animate-in fade-in"
         />
       )}
 
-      {/* Sidebar Container */}
+      {/* Official Spotify Left Sidebar */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-40 w-64 md:w-60 lg:w-64 bg-transparent flex flex-col gap-2 transition-transform duration-300 md:translate-x-0 ${
-          isMobileOpen ? 'translate-x-0 p-3 bg-[#0c0c0e]/95 backdrop-blur-2xl' : '-translate-x-full md:translate-x-0'
+        className={`fixed md:static inset-y-0 left-0 z-40 w-72 md:w-64 lg:w-72 xl:w-80 bg-black flex flex-col gap-2 p-1.5 md:p-2 transition-transform duration-300 select-none ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
-        {/* Brand & Main Nav Shell */}
-        <div className="bg-[#121217]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-3.5 flex flex-col gap-2.5 shadow-xl">
-          {/* Logo & Studio Badge */}
-          <div className="flex items-center justify-between px-2 py-1 mb-1">
-            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => onNavigate('home')}>
-              <div className="relative">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#1db954] to-[#1ed760] flex items-center justify-center text-black shadow-[0_0_16px_rgba(29,185,84,0.35)]">
-                  <svg className="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.623.623 0 0 1-.857.206c-2.348-1.435-5.304-1.76-8.785-.964a.625.625 0 0 1-.282-1.218c3.808-.87 7.076-.496 9.718 1.119a.624.624 0 0 1 .206.857zm1.225-2.723a.78.78 0 0 1-1.072.257c-2.687-1.652-6.785-2.131-9.965-1.166a.78.78 0 0 1-.454-1.493c3.632-1.103 8.147-.568 11.234 1.33a.78.78 0 0 1 .257 1.072zm.105-2.835C14.692 8.95 9.375 8.775 6.297 9.71a.936.936 0 1 1-.546-1.791c3.528-1.07 9.409-.865 13.146 1.355a.936.936 0 0 1-.981 1.592z" />
-                  </svg>
-                </div>
-              </div>
-              <span className="text-base font-extrabold text-white tracking-tight">Spotify</span>
-            </div>
-
-            <span className="text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full bg-[#1db954]/10 text-[#1db954] border border-[#1db954]/25">
-              Studio
-            </span>
-          </div>
-
-          <nav className="flex flex-col gap-1">
+        {/* Your Library Card (Official Spotify Structure) */}
+        <div className="bg-[#121212] rounded-lg flex-1 flex flex-col min-h-0 overflow-hidden shadow-inner">
+          {/* Top Library Header */}
+          <div className="flex items-center justify-between px-4 pt-3.5 pb-2 text-[#b3b3b3]">
             <button
-              onClick={() => onNavigate('home')}
-              className={navItemClass(currentView.type === 'home')}
+              onClick={() => onNavigate('tracks')}
+              className="flex items-center gap-3 text-sm font-bold text-[#b3b3b3] hover:text-white transition"
+              title="Collapse/Expand Library"
             >
-              <Home className={`w-4 h-4 transition ${currentView.type === 'home' ? 'text-[#1db954]' : 'group-hover:text-white'}`} />
-              <span>Home</span>
-            </button>
-            <button
-              onClick={() => onNavigate('search')}
-              className={navItemClass(currentView.type === 'search')}
-            >
-              <Search className={`w-4 h-4 transition ${currentView.type === 'search' ? 'text-[#1db954]' : 'group-hover:text-white'}`} />
-              <span>Search</span>
-            </button>
-          </nav>
-        </div>
-
-        {/* Library & Playlists Shell */}
-        <div className="bg-[#121217]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl flex-1 p-3 flex flex-col min-h-0 shadow-xl overflow-hidden">
-          {/* Library Header */}
-          <div className="flex items-center justify-between px-2 py-1.5 text-neutral-400">
-            <div className="flex items-center gap-2 font-bold text-xs tracking-wider uppercase text-neutral-400">
-              <Library className="w-4 h-4 text-neutral-400" />
+              <Library className="w-6 h-6" />
               <span>Your Library</span>
-            </div>
-            <button
-              onClick={() => setIsCreating(true)}
-              className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] hover:text-white text-neutral-400 border border-white/[0.05] transition active:scale-95"
-              title="Create New Playlist"
-            >
-              <Plus className="w-3.5 h-3.5" />
             </button>
+
+            <div className="flex items-center gap-1 relative">
+              <button
+                onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
+                className="p-1.5 rounded-full hover:bg-white/10 text-[#b3b3b3] hover:text-white transition"
+                title="Create playlist or folder"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+
+              {/* Plus Menu Dropdown */}
+              {isPlusMenuOpen && (
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute right-0 top-full mt-1.5 w-52 bg-[#282828] border border-white/10 rounded-lg shadow-2xl py-1.5 z-50 animate-in zoom-in-95 duration-100"
+                >
+                  <button
+                    onClick={() => {
+                      setIsCreating(true);
+                      setIsPlusMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-xs text-white hover:bg-white/10 text-left"
+                  >
+                    <ListPlus className="w-4 h-4 text-[#b3b3b3]" />
+                    <span>Create a new playlist</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsPlusMenuOpen(false);
+                      alert('Folders are organized automatically.');
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-xs text-white hover:bg-white/10 text-left"
+                  >
+                    <FolderPlus className="w-4 h-4 text-[#b3b3b3]" />
+                    <span>Create a playlist folder</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Library Sub-navigation Segmented Controller */}
-          <div className="flex items-center gap-1 p-1 bg-black/40 rounded-xl border border-white/[0.05] my-2">
+          {/* Filter Pills (Official Spotify Chips) */}
+          <div className="flex items-center gap-2 px-4 py-2 overflow-x-auto no-scrollbar">
             {[
-              { id: 'tracks', label: 'Songs' },
-              { id: 'albums', label: 'Albums' },
+              { id: 'all', label: 'All' },
+              { id: 'playlists', label: 'Playlists' },
               { id: 'artists', label: 'Artists' },
-            ].map((tab) => {
-              const isActive = currentView.type === tab.id;
+              { id: 'albums', label: 'Albums' },
+            ].map((chip) => {
+              const isActive = filterType === chip.id;
               return (
                 <button
-                  key={tab.id}
-                  onClick={() => onNavigate(tab.id)}
-                  className={`flex-1 py-1 px-2 rounded-lg text-[11px] font-semibold transition-all duration-200 text-center truncate ${
+                  key={chip.id}
+                  onClick={() => {
+                    setFilterType(chip.id);
+                    if (chip.id === 'artists') onNavigate('artists');
+                    if (chip.id === 'albums') onNavigate('albums');
+                    if (chip.id === 'playlists') onNavigate('tracks');
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
                     isActive
-                      ? 'bg-white text-black shadow-md font-bold'
-                      : 'text-neutral-400 hover:text-white hover:bg-white/[0.05]'
+                      ? 'bg-white text-black font-bold'
+                      : 'bg-white/10 text-white hover:bg-white/15'
                   }`}
                 >
-                  {tab.label}
+                  {chip.label}
                 </button>
               );
             })}
           </div>
 
-          {/* New Playlist Input Drawer */}
+          {/* Search in Library & Sort & View Mode Row */}
+          <div className="flex items-center justify-between px-3 py-1.5 text-xs text-[#b3b3b3]">
+            {/* Expandable Search Button */}
+            <div className="flex items-center gap-1 min-w-0 flex-1">
+              <button
+                onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+                className="p-1.5 rounded-full hover:bg-white/10 text-[#b3b3b3] hover:text-white transition flex-shrink-0"
+                title="Search in Your Library"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+              {isSearchExpanded && (
+                <input
+                  type="text"
+                  autoFocus
+                  value={librarySearch}
+                  onChange={(e) => setLibrarySearch(e.target.value)}
+                  placeholder="Search in Your Library"
+                  className="w-full bg-[#242424] text-xs text-white px-2 py-1 rounded placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-white/20 animate-in fade-in"
+                />
+              )}
+            </div>
+
+            {/* Recents Sort & List/Grid View Button */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <span className="text-[11px] font-medium hover:text-white cursor-pointer flex items-center gap-1">
+                Recents <ListFilter className="w-3.5 h-3.5" />
+              </span>
+
+              <button
+                onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
+                className="p-1 text-[#b3b3b3] hover:text-white transition"
+                title={viewMode === 'list' ? 'Switch to Grid view' : 'Switch to List view'}
+              >
+                {viewMode === 'list' ? (
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                ) : (
+                  <List className="w-3.5 h-3.5" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* New Playlist Input */}
           {isCreating && (
-            <form onSubmit={handleCreateSubmit} className="p-1 animate-in fade-in duration-200">
+            <form onSubmit={handleCreateSubmit} className="p-3 animate-in fade-in">
               <input
                 type="text"
                 autoFocus
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
-                placeholder="Give your playlist a name..."
-                className="w-full px-3 py-2 bg-neutral-900 border border-[#1db954]/50 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#1db954]"
+                placeholder="New playlist name..."
+                className="w-full px-3 py-1.5 bg-[#242424] border border-[#1db954] rounded text-xs text-white placeholder-neutral-500 focus:outline-none"
                 onBlur={() => !newPlaylistName && setIsCreating(false)}
               />
             </form>
           )}
 
-          {/* Pinned: Liked Songs Card */}
-          <div className="mt-1">
-            <button
-              onClick={() => onNavigate('liked')}
-              className={`w-full flex items-center gap-3 p-2 rounded-xl transition text-left group ${
-                currentView.type === 'liked'
-                  ? 'bg-white/[0.08] border border-white/[0.08]'
-                  : 'hover:bg-white/[0.04]'
-              }`}
-            >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition duration-200">
-                <Heart className="w-5 h-5 fill-white text-white drop-shadow-sm" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-white truncate">Liked Songs</p>
-                <p className="text-[11px] text-neutral-400">Auto collection</p>
-              </div>
-            </button>
-          </div>
-
-          {/* Custom Playlists Scroll List */}
-          <div className="flex-1 overflow-y-auto mt-2 space-y-1 pr-1">
-            {playlists.length === 0 ? (
-              <div className="py-6 px-2 text-center text-neutral-500 text-xs">
-                No playlists yet. Click the + button above to create one.
-              </div>
-            ) : (
-              playlists.map((pl) => {
-                const isActive = currentView.type === 'playlist' && currentView.id === pl.id;
-                return (
-                  <div
-                    key={pl.id}
-                    onClick={() => onNavigate('playlist', { id: pl.id })}
-                    className={`group flex items-center justify-between p-2 rounded-xl cursor-pointer transition select-none ${
-                      isActive
-                        ? 'bg-white/[0.08] text-white border border-white/[0.08]'
-                        : 'hover:bg-white/[0.04] text-neutral-300'
+          {/* Library Items List / Grid */}
+          <div className="flex-1 overflow-y-auto px-2 space-y-0.5 pb-2 pr-1">
+            {/* Pinned: Liked Songs (Official Spotify Pin Styling) */}
+            {(filterType === 'all' || filterType === 'playlists') && (
+              <div
+                onClick={() => onNavigate('liked')}
+                className={`group flex items-center gap-3 p-2 rounded-md transition cursor-pointer select-none ${
+                  currentView.type === 'liked' ? 'bg-[#282828]' : 'hover:bg-[#1a1a1a]'
+                }`}
+              >
+                <div className="w-12 h-12 rounded bg-gradient-to-br from-[#450af5] to-[#c4efd9] flex items-center justify-center flex-shrink-0 shadow">
+                  <Heart className="w-5 h-5 fill-white text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={`text-sm font-semibold truncate ${
+                      currentView.type === 'liked' ? 'text-[#1db954]' : 'text-white'
                     }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="w-9 h-9 rounded-lg bg-neutral-800/80 border border-white/[0.05] flex items-center justify-center flex-shrink-0 overflow-hidden text-neutral-400 shadow-sm">
-                        {pl.previewArt ? (
-                          <img src={pl.previewArt} alt={pl.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <Music className="w-4 h-4 text-neutral-400" />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold truncate group-hover:text-white transition">
-                          {pl.name}
-                        </p>
-                        <p className="text-[10px] text-neutral-500 font-mono truncate">
-                          {pl.trackCount || 0} {pl.trackCount === 1 ? 'song' : 'songs'}
-                        </p>
-                      </div>
-                    </div>
+                    Liked Songs
+                  </p>
+                  <p className="text-xs text-[#b3b3b3] truncate flex items-center gap-1.5 mt-0.5">
+                    <Pin className="w-3 h-3 fill-[#1db954] text-[#1db954] transform rotate-45" />
+                    <span>Playlist • Auto-collection</span>
+                  </p>
+                </div>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm(`Delete playlist "${pl.name}"?`)) {
-                          onDeletePlaylist(pl.id);
-                        }
-                      }}
-                      className="p-1.5 opacity-0 group-hover:opacity-100 hover:text-red-400 text-neutral-500 transition rounded-md hover:bg-red-500/10"
-                      title="Delete playlist"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                );
-              })
+                {isPlaying && currentTrack?.isLiked && (
+                  <Volume2 className="w-4 h-4 text-[#1db954] animate-pulse flex-shrink-0 mr-1" />
+                )}
+              </div>
             )}
-          </div>
 
-          {/* Action Footer */}
-          <div className="pt-2 border-t border-white/[0.06] mt-auto">
-            <button
-              onClick={onOpenAccount}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-neutral-300 hover:text-white bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.04] transition active:scale-95"
-            >
-              <span className="flex items-center gap-2">
-                <Settings className="w-3.5 h-3.5 text-[#1db954]" />
-                <span>Settings & Account</span>
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#1db954]" />
-            </button>
+            {/* Custom Playlists */}
+            {filteredPlaylists.map((pl) => {
+              const isActive = currentView.type === 'playlist' && currentView.id === pl.id;
+
+              return (
+                <div
+                  key={pl.id}
+                  onClick={() => onNavigate('playlist', { id: pl.id })}
+                  className={`group flex items-center justify-between p-2 rounded-md transition cursor-pointer select-none ${
+                    isActive ? 'bg-[#282828]' : 'hover:bg-[#1a1a1a]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-12 h-12 rounded bg-neutral-800 flex items-center justify-center flex-shrink-0 overflow-hidden text-neutral-400">
+                      {pl.previewArt ? (
+                        <img src={pl.previewArt} alt={pl.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Music className="w-5 h-5" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={`text-sm font-semibold truncate ${
+                          isActive ? 'text-[#1db954]' : 'text-white'
+                        }`}
+                      >
+                        {pl.name}
+                      </p>
+                      <p className="text-xs text-[#b3b3b3] truncate mt-0.5">
+                        Playlist • {pl.trackCount || 0} songs
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm(`Delete playlist "${pl.name}"?`)) {
+                        onDeletePlaylist(pl.id);
+                      }
+                    }}
+                    className="p-1 opacity-0 group-hover:opacity-100 hover:text-red-400 text-neutral-500 transition"
+                    title="Delete playlist"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })}
+
+            {/* Quick shortcuts to Artists & Albums */}
+            {(filterType === 'all' || filterType === 'artists') && (
+              <div
+                onClick={() => onNavigate('artists')}
+                className={`group flex items-center gap-3 p-2 rounded-md transition cursor-pointer ${
+                  currentView.type === 'artists' ? 'bg-[#282828]' : 'hover:bg-[#1a1a1a]'
+                }`}
+              >
+                <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center flex-shrink-0 text-neutral-400">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-white truncate">Artists</p>
+                  <p className="text-xs text-[#b3b3b3] truncate mt-0.5">Artist Catalog</p>
+                </div>
+              </div>
+            )}
+
+            {(filterType === 'all' || filterType === 'albums') && (
+              <div
+                onClick={() => onNavigate('albums')}
+                className={`group flex items-center gap-3 p-2 rounded-md transition cursor-pointer ${
+                  currentView.type === 'albums' ? 'bg-[#282828]' : 'hover:bg-[#1a1a1a]'
+                }`}
+              >
+                <div className="w-12 h-12 rounded bg-neutral-800 flex items-center justify-center flex-shrink-0 text-neutral-400">
+                  <Disc3 className="w-5 h-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-white truncate">Albums</p>
+                  <p className="text-xs text-[#b3b3b3] truncate mt-0.5">Album Catalog</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </aside>

@@ -5,13 +5,11 @@ import {
   Play,
   Shuffle,
   Music,
+  Disc3,
+  Users,
   Search,
   Sparkles,
-  ArrowUpDown,
-  ListMusic,
-  Heart,
-  Clock,
-  Disc3,
+  ArrowRight,
 } from 'lucide-react';
 import { formatDuration } from '../../utils/formatters';
 
@@ -23,35 +21,29 @@ export function HomeView({
 }) {
   const { playTrack, toggleShuffle, currentTrack, isPlaying } = usePlayer();
   const [tracks, setTracks] = useState([]);
+  const [albums, setAlbums] = useState([]);
+  const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchFilter, setSearchFilter] = useState('');
-  const [sortBy, setSortBy] = useState('order');
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [homeFilter, setHomeFilter] = useState('all'); // 'all' | 'music' | 'podcasts'
 
-  const fetchTracks = () => {
+  useEffect(() => {
     setLoading(true);
-    let url = `/api/tracks?sort=${sortBy}&order=${sortOrder}`;
-    if (searchFilter.trim()) {
-      url += `&q=${encodeURIComponent(searchFilter.trim())}`;
-    }
-
-    fetch(url)
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setTracks(data);
-        }
+    Promise.all([
+      fetch('/api/tracks?sort=order&order=asc').then((r) => r.json()),
+      fetch('/api/albums').then((r) => r.json()).catch(() => []),
+      fetch('/api/artists').then((r) => r.json()).catch(() => []),
+    ])
+      .then(([tracksData, albumsData, artistsData]) => {
+        if (Array.isArray(tracksData)) setTracks(tracksData);
+        if (Array.isArray(albumsData)) setAlbums(albumsData);
+        if (Array.isArray(artistsData)) setArtists(artistsData);
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Fetch home tracks error:', err);
+        console.error('Home load error:', err);
         setLoading(false);
       });
-  };
-
-  useEffect(() => {
-    fetchTracks();
-  }, [sortBy, sortOrder, searchFilter]);
+  }, []);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -60,88 +52,68 @@ export function HomeView({
     return 'Good evening';
   };
 
-  const getGreetingAura = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'from-amber-500/10 via-[#1db954]/10';
-    if (hour < 18) return 'from-emerald-500/15 via-[#1db954]/10';
-    return 'from-indigo-600/15 via-purple-600/10';
-  };
-
-  const handlePlayAll = () => {
-    if (tracks.length > 0) {
-      playTrack(tracks[0], tracks, 0);
-    }
-  };
-
-  const handleShuffleAll = () => {
-    if (tracks.length > 0) {
-      toggleShuffle();
-      const randomIndex = Math.floor(Math.random() * tracks.length);
-      playTrack(tracks[randomIndex], tracks, randomIndex);
-    }
-  };
-
   const handleQuickPlay = (track, idx) => {
     playTrack(track, tracks, idx);
   };
 
-  const totalDuration = tracks.reduce((sum, t) => sum + (t.durationSec || 0), 0);
+  const handlePlayAlbumDirect = async (e, albumName) => {
+    e.stopPropagation();
+    try {
+      const res = await fetch(`/api/albums/${encodeURIComponent(albumName)}`);
+      const data = await res.json();
+      if (data.tracks && data.tracks.length > 0) {
+        playTrack(data.tracks[0], data.tracks, 0);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePlayArtistDirect = async (e, artistName) => {
+    e.stopPropagation();
+    try {
+      const res = await fetch(`/api/artists/${encodeURIComponent(artistName)}`);
+      const data = await res.json();
+      if (data.tracks && data.tracks.length > 0) {
+        playTrack(data.tracks[0], data.tracks, 0);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const quickJumpTracks = tracks.slice(0, 6);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8 animate-in fade-in duration-300 relative">
-      {/* Dynamic Background Atmosphere Glow */}
-      <div className={`pointer-events-none absolute -top-12 left-0 right-0 h-64 bg-gradient-to-b ${getGreetingAura()} to-transparent blur-3xl -z-10 opacity-70`} />
-
-      {/* Greeting Header & Stats */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#1db954] font-black px-2.5 py-0.5 rounded-full bg-[#1db954]/10 border border-[#1db954]/25">
-              Personalized Audio Experience
-            </span>
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            {getGreeting()}
-          </h1>
-          <p className="text-xs sm:text-sm text-neutral-400 mt-1.5 flex items-center gap-2 font-medium">
-            <span>{tracks.length} Mastered Tracks</span>
-            <span>•</span>
-            <span className="font-mono tabular-nums">{formatDuration(totalDuration)} total listening</span>
-          </p>
-        </div>
-
-        {/* Master Playback Cluster with Button-in-Button CTA */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handlePlayAll}
-            disabled={tracks.length === 0}
-            className="group relative h-11 sm:h-12 pl-4 pr-5 rounded-full bg-[#1db954] hover:bg-[#1ed760] disabled:opacity-40 text-black font-extrabold text-xs sm:text-sm flex items-center gap-3 transition-all duration-200 shadow-[0_4px_24px_rgba(29,185,84,0.35)] active:scale-95"
-            title="Play library from start (#1)"
-          >
-            <div className="w-7 h-7 rounded-full bg-black/15 flex items-center justify-center transition-transform group-hover:scale-110">
-              <Play className="w-3.5 h-3.5 fill-black ml-0.5" />
-            </div>
-            <span>Play Library</span>
-          </button>
-
-          <button
-            onClick={handleShuffleAll}
-            disabled={tracks.length === 0}
-            className="p-3 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-white transition active:scale-90 disabled:opacity-40 shadow-sm"
-            title="Shuffle play"
-          >
-            <Shuffle className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-          </button>
-        </div>
+    <div className="p-4 sm:p-6 md:p-8 space-y-7 md:space-y-9 animate-in fade-in duration-300 select-none">
+      {/* Top Filter Chips (Official Spotify: All, Music, Podcasts) */}
+      <div className="flex items-center gap-2">
+        {['All', 'Music', 'Podcasts'].map((chip) => {
+          const isActive = homeFilter === chip.toLowerCase();
+          return (
+            <button
+              key={chip}
+              onClick={() => setHomeFilter(chip.toLowerCase())}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
+                isActive
+                  ? 'bg-white text-black font-bold'
+                  : 'bg-white/10 text-white hover:bg-white/15'
+              }`}
+            >
+              {chip}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Bento Quick-Play Highlights Grid (Signature Spotify 6-Card Grid) */}
-      {quickJumpTracks.length > 0 && !searchFilter && (
-        <div className="space-y-3">
-          <h2 className="text-xs uppercase tracking-widest text-neutral-400 font-bold">
-            Quick Jump
-          </h2>
+      {/* Greeting Title */}
+      <div className="space-y-4">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">
+          {getGreeting()}
+        </h1>
+
+        {/* 6 Quick-play Bento Cards (The Official Spotify Home Grid) */}
+        {quickJumpTracks.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
             {quickJumpTracks.map((track, idx) => {
               const isCurrent = currentTrack && currentTrack.id === track.id;
@@ -151,44 +123,41 @@ export function HomeView({
                 <div
                   key={track.id}
                   onClick={() => handleQuickPlay(track, idx)}
-                  className={`group relative flex items-center gap-3 p-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-200 cursor-pointer overflow-hidden shadow-sm select-none ${
-                    isCurrent ? 'bg-white/[0.08] border-[#1db954]/30' : ''
-                  }`}
+                  className="group relative flex items-center bg-[#282828]/70 hover:bg-[#383838] transition-colors rounded-md overflow-hidden cursor-pointer shadow-sm pr-4"
                 >
-                  <div className="w-12 h-12 rounded-lg bg-neutral-800 overflow-hidden flex-shrink-0 relative shadow-md">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-neutral-800 flex-shrink-0 relative shadow-md">
                     {track.albumArtPath ? (
                       <img
                         src={track.albumArtPath}
                         alt={track.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-800 to-neutral-900 text-neutral-400">
-                        <Disc3 className="w-6 h-6" />
+                      <div className="w-full h-full flex items-center justify-center bg-neutral-800 text-neutral-400">
+                        <Disc3 className="w-7 h-7" />
                       </div>
                     )}
                   </div>
 
-                  <div className="min-w-0 flex-1 pr-12">
-                    <p className={`text-xs font-bold truncate ${isCurrent ? 'text-[#1db954]' : 'text-white'}`}>
+                  <div className="min-w-0 flex-1 px-3 sm:px-4">
+                    <p className={`text-xs sm:text-sm font-bold truncate ${isCurrent ? 'text-[#1db954]' : 'text-white'}`}>
                       {track.title}
                     </p>
-                    <p className="text-[11px] text-neutral-400 truncate mt-0.5">
+                    <p className="text-[11px] text-[#b3b3b3] truncate mt-0.5">
                       {track.artist}
                     </p>
                   </div>
 
-                  {/* Floating Green Play Button on Hover */}
-                  <div className="absolute right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-1 group-hover:translate-x-0 shadow-xl">
+                  {/* Spotify Green Hover Play Button with Shadow */}
+                  <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-1 group-hover:translate-y-0 flex-shrink-0 shadow-2xl">
                     <button
-                      className="w-9 h-9 rounded-full bg-[#1db954] hover:bg-[#1ed760] text-black flex items-center justify-center shadow-lg active:scale-90"
+                      className="w-10 h-10 rounded-full bg-[#1db954] hover:scale-105 active:scale-95 text-black flex items-center justify-center shadow-lg transition-transform"
                       title={isRowPlaying ? 'Pause' : 'Play'}
                     >
                       {isRowPlaying ? (
                         <div className="flex items-end gap-0.5 h-3">
-                          <div className="w-0.5 bg-black animate-eq-1 h-2" />
-                          <div className="w-0.5 bg-black animate-eq-2 h-3" />
-                          <div className="w-0.5 bg-black animate-eq-3 h-1.5" />
+                          <div className="w-0.5 bg-black animate-pulse h-2" />
+                          <div className="w-0.5 bg-black animate-pulse h-3" />
                         </div>
                       ) : (
                         <Play className="w-4 h-4 fill-black ml-0.5" />
@@ -199,82 +168,148 @@ export function HomeView({
               );
             })}
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Section 1: Made For You / Top Albums (Official Spotify Card Carousels) */}
+      {albums.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2
+              onClick={() => onNavigate('albums')}
+              className="text-xl sm:text-2xl font-bold text-white tracking-tight hover:underline cursor-pointer"
+            >
+              Popular albums
+            </h2>
+            <button
+              onClick={() => onNavigate('albums')}
+              className="text-xs font-bold text-[#b3b3b3] hover:text-white hover:underline transition"
+            >
+              Show all
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {albums.slice(0, 6).map((album, idx) => (
+              <div
+                key={idx}
+                onClick={() => onNavigate('album-detail', { name: album.name })}
+                className="group p-3 sm:p-4 bg-[#181818] hover:bg-[#282828] rounded-md transition duration-300 cursor-pointer flex flex-col relative"
+              >
+                <div className="w-full aspect-square rounded bg-neutral-800 overflow-hidden mb-3 relative shadow-md">
+                  {album.albumArtPath ? (
+                    <img
+                      src={album.albumArtPath}
+                      alt={album.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-neutral-500">
+                      <Disc3 className="w-12 h-12" />
+                    </div>
+                  )}
+
+                  {/* Floating Green Play Button on Hover (Signature Spotify) */}
+                  <button
+                    onClick={(e) => handlePlayAlbumDirect(e, album.name)}
+                    className="absolute bottom-2 right-2 w-11 h-11 rounded-full bg-[#1db954] hover:scale-105 active:scale-95 text-black flex items-center justify-center shadow-2xl opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 duration-200"
+                    title="Play album"
+                  >
+                    <Play className="w-5 h-5 fill-black ml-0.5" />
+                  </button>
+                </div>
+
+                <h3 className="text-sm font-bold text-white truncate">{album.name}</h3>
+                <p className="text-xs text-[#b3b3b3] truncate mt-1">{album.artist}</p>
+                <p className="text-[11px] text-[#727272] mt-0.5 font-mono">{album.trackCount} songs</p>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
-      {/* Filter, Search & Sort Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-        {/* Search Input */}
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-          <input
-            type="text"
-            value={searchFilter}
-            onChange={(e) => setSearchFilter(e.target.value)}
-            placeholder="Filter tracks or artists..."
-            className="w-full pl-10 pr-3.5 py-2 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#1db954] focus:ring-1 focus:ring-[#1db954]/50 transition"
-          />
-        </div>
-
-        {/* Sort Controls */}
-        <div className="flex items-center justify-between sm:justify-end gap-2 text-xs text-neutral-400">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06]">
-            <ArrowUpDown className="w-3 h-3 text-[#1db954]" />
-            <span className="text-[11px] font-semibold text-neutral-400">Sort:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-transparent text-xs text-white font-medium focus:outline-none cursor-pointer"
+      {/* Section 2: Popular Artists (Circular Cards with hover green button) */}
+      {artists.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2
+              onClick={() => onNavigate('artists')}
+              className="text-xl sm:text-2xl font-bold text-white tracking-tight hover:underline cursor-pointer"
             >
-              <option value="order" className="bg-[#18181f]">Track Order (# 1..18)</option>
-              <option value="title" className="bg-[#18181f]">Title (A-Z)</option>
-              <option value="artist" className="bg-[#18181f]">Artist</option>
-              <option value="durationSec" className="bg-[#18181f]">Duration</option>
-              <option value="dateAdded" className="bg-[#18181f]">Recently Added</option>
-            </select>
+              Popular artists
+            </h2>
+            <button
+              onClick={() => onNavigate('artists')}
+              className="text-xs font-bold text-[#b3b3b3] hover:text-white hover:underline transition"
+            >
+              Show all
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {artists.slice(0, 6).map((artist, idx) => (
+              <div
+                key={idx}
+                onClick={() => onNavigate('artist-detail', { name: artist.name })}
+                className="group p-3 sm:p-4 bg-[#181818] hover:bg-[#282828] rounded-md transition duration-300 cursor-pointer flex flex-col items-center text-center relative"
+              >
+                <div className="w-full aspect-square rounded-full bg-neutral-800 overflow-hidden mb-3 relative shadow-md">
+                  {artist.albumArtPath ? (
+                    <img
+                      src={artist.albumArtPath}
+                      alt={artist.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-neutral-500">
+                      <Users className="w-12 h-12" />
+                    </div>
+                  )}
+
+                  {/* Floating Play Button */}
+                  <button
+                    onClick={(e) => handlePlayArtistDirect(e, artist.name)}
+                    className="absolute bottom-2 right-2 w-11 h-11 rounded-full bg-[#1db954] hover:scale-105 active:scale-95 text-black flex items-center justify-center shadow-2xl opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 duration-200"
+                    title="Play artist"
+                  >
+                    <Play className="w-5 h-5 fill-black ml-0.5" />
+                  </button>
+                </div>
+
+                <h3 className="text-sm font-bold text-white truncate w-full">{artist.name}</h3>
+                <p className="text-xs text-[#b3b3b3] truncate mt-1">Artist</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Section 3: All Songs (Complete Master Catalog) */}
+      <section className="space-y-4 pt-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              All Tracks
+            </h2>
+            <p className="text-xs text-[#b3b3b3] mt-0.5 font-mono tabular-nums">
+              {tracks.length} songs available
+            </p>
           </div>
 
           <button
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] text-neutral-300 font-mono uppercase text-[10px] tracking-wider border border-white/[0.08] transition active:scale-95"
-            title="Toggle sort direction"
+            onClick={() => {
+              if (tracks.length > 0) playTrack(tracks[0], tracks, 0);
+            }}
+            className="text-xs font-bold text-[#1db954] hover:underline"
           >
-            {sortOrder}
+            Play from top
           </button>
-        </div>
-      </div>
-
-      {/* Main Track Table Section */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
-            {searchFilter ? `Search Results for "${searchFilter}"` : 'Library Songs'}
-          </h2>
-          <span className="text-xs text-neutral-400 font-mono tabular-nums">
-            {tracks.length} songs
-          </span>
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-neutral-400 text-sm">
-            <div className="w-8 h-8 rounded-full border-2 border-[#1db954]/20 border-t-[#1db954] animate-spin mx-auto mb-3" />
-            <span>Loading library audio...</span>
-          </div>
-        ) : tracks.length === 0 ? (
-          <div className="py-20 text-center text-neutral-400 text-sm space-y-3">
-            <Music className="w-12 h-12 mx-auto text-neutral-600 opacity-40" />
-            <p className="font-semibold text-white">No songs found</p>
-            <p className="text-xs text-neutral-400 max-w-sm mx-auto">
-              {searchFilter ? 'No songs match your search query.' : 'No songs available in your library.'}
-            </p>
-            {searchFilter && (
-              <button
-                onClick={() => setSearchFilter('')}
-                className="px-4 py-2 rounded-full bg-white/[0.08] hover:bg-white/[0.15] text-white text-xs font-semibold border border-white/10"
-              >
-                Clear Search
-              </button>
-            )}
+          <div className="py-20 text-center text-[#b3b3b3] text-sm">
+            <div className="w-8 h-8 rounded-full border-2 border-[#1db954] border-t-transparent animate-spin mx-auto mb-3" />
+            <span>Loading Spotify library...</span>
           </div>
         ) : (
           <TrackList
@@ -283,7 +318,7 @@ export function HomeView({
             onAddToPlaylist={onAddToPlaylist}
           />
         )}
-      </div>
+      </section>
     </div>
   );
 }
