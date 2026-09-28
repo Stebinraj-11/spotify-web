@@ -178,8 +178,12 @@ function MainApp() {
   // Wait for initial auth check
   if (!authChecked) {
     return (
-      <div className="h-screen w-screen bg-black flex items-center justify-center text-neutral-400">
-        <div className="w-8 h-8 rounded-full border-2 border-[#1db954] border-t-transparent animate-spin" />
+      <div className="h-screen w-screen bg-[#09090b] flex flex-col items-center justify-center text-neutral-400 gap-4">
+        <div className="relative">
+          <div className="w-12 h-12 rounded-full border-2 border-[#1db954]/20 border-t-[#1db954] animate-spin" />
+          <div className="absolute inset-0 rounded-full blur-md bg-[#1db954]/20 animate-pulse" />
+        </div>
+        <p className="text-xs font-medium text-neutral-400 tracking-wide uppercase">Connecting to Music Library...</p>
       </div>
     );
   }
@@ -196,10 +200,34 @@ function MainApp() {
     );
   }
 
+  const getViewBreadcrumb = () => {
+    switch (currentView.type) {
+      case 'home': return 'Home';
+      case 'search': return 'Search';
+      case 'tracks': return 'Library / Songs';
+      case 'albums': return 'Library / Albums';
+      case 'artists': return 'Library / Artists';
+      case 'liked': return 'Liked Songs';
+      case 'playlist': {
+        const pl = playlists.find(p => p.id === currentView.id);
+        return pl ? `Playlist / ${pl.name}` : 'Playlist';
+      }
+      case 'album-detail': return `Album / ${currentView.name || ''}`;
+      case 'artist-detail': return `Artist / ${currentView.name || ''}`;
+      default: return 'Spotify';
+    }
+  };
+
   return (
-    <div className="flex flex-col h-screen w-screen bg-black text-white overflow-hidden font-sans select-none">
+    <div className="flex flex-col h-screen w-screen bg-[#09090b] text-[#f4f4f5] overflow-hidden select-none relative">
+      {/* Background Studio Ambient Lighting */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute -top-40 right-1/4 w-[600px] h-[400px] bg-[#1db954]/[0.04] rounded-full blur-[120px] animate-aura" />
+        <div className="absolute top-1/2 -left-32 w-[500px] h-[500px] bg-indigo-500/[0.03] rounded-full blur-[140px]" />
+      </div>
+
       {/* Upper Area: Sidebar + Scrollable View */}
-      <div className="flex-1 flex overflow-hidden p-1.5 md:p-2 gap-2">
+      <div className="flex-1 flex overflow-hidden p-1.5 md:p-2 gap-2 z-10 relative">
         {/* Left Sidebar (Desktop fixed, Mobile off-canvas drawer) */}
         <Sidebar
           currentView={currentView}
@@ -212,56 +240,66 @@ function MainApp() {
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
-        {/* Main Content Pane */}
-        <main className="flex-1 bg-[#121212] rounded-xl flex flex-col overflow-hidden relative shadow-inner">
+        {/* Main Content Pane with Doppelrand / Double-Bezel architecture */}
+        <main className="flex-1 bg-[#121217]/90 rounded-2xl flex flex-col overflow-hidden relative border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl">
           {/* Top Bar (Header) */}
-          <header className="h-14 md:h-16 px-4 md:px-6 flex items-center justify-between border-b border-white/5 bg-[#121212]/90 backdrop-blur-md sticky top-0 z-30">
-            {/* Nav Arrows & Mobile Hamburger */}
-            <div className="flex items-center gap-1.5 md:gap-2">
+          <header className="h-14 md:h-16 px-4 md:px-6 flex items-center justify-between border-b border-white/[0.06] bg-[#121217]/80 backdrop-blur-xl sticky top-0 z-30">
+            {/* Nav Arrows & Mobile Hamburger & Breadcrumb */}
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setIsMobileSidebarOpen(true)}
-                className="md:hidden p-2 rounded-full hover:bg-white/10 text-neutral-300 active:scale-95"
+                className="md:hidden p-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-neutral-300 active:scale-95 transition"
                 title="Open Library Menu"
               >
-                <Menu className="w-5 h-5" />
+                <Menu className="w-4 h-4" />
               </button>
 
-              <button
-                onClick={handleBack}
-                disabled={historyIndex === 0}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 hover:bg-black/90 disabled:opacity-30 text-white flex items-center justify-center transition"
-                title="Go back"
-              >
-                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleBack}
+                  disabled={historyIndex === 0}
+                  className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] disabled:opacity-25 text-white flex items-center justify-center transition active:scale-95"
+                  title="Go back"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
 
-              <button
-                onClick={handleForward}
-                disabled={historyIndex >= history.length - 1}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 hover:bg-black/90 disabled:opacity-30 text-white flex items-center justify-center transition hidden sm:flex"
-                title="Go forward"
-              >
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+                <button
+                  onClick={handleForward}
+                  disabled={historyIndex >= history.length - 1}
+                  className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] disabled:opacity-25 text-white flex items-center justify-center transition hidden sm:flex active:scale-95"
+                  title="Go forward"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Breadcrumb pill */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.05] text-[11px] font-medium text-neutral-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#1db954]" />
+                <span className="truncate max-w-[220px]">{getViewBreadcrumb()}</span>
+              </div>
             </div>
 
             {/* Account & Profile Badge in Header */}
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setIsAccountOpen(true)}
-                className="flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition active:scale-95 border border-white/10 shadow-sm"
+                className="group flex items-center gap-2.5 pl-1.5 pr-3.5 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-white text-xs font-semibold transition active:scale-95 shadow-sm"
                 title="Account Settings"
               >
-                <div className="w-6 h-6 rounded-full bg-[#1db954] flex items-center justify-center text-black font-black text-xs">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#1db954] to-[#1ed760] flex items-center justify-center text-black font-extrabold text-[11px] shadow-sm">
                   {accountUser ? accountUser[0].toUpperCase() : 'S'}
                 </div>
-                <span className="hidden sm:inline font-bold">{accountUser || 'Account'}</span>
+                <span className="hidden sm:inline font-medium text-neutral-200 group-hover:text-white transition">
+                  {accountUser || 'Account'}
+                </span>
               </button>
 
               {isAuthRequired && (
                 <button
                   onClick={handleLogout}
-                  className="p-2 rounded-full hover:bg-white/10 text-neutral-300 hover:text-red-400 transition"
+                  className="p-2 rounded-full hover:bg-red-500/10 text-neutral-400 hover:text-red-400 border border-transparent hover:border-red-500/20 transition"
                   title="Lock / Logout"
                 >
                   <LogOut className="w-4 h-4" />

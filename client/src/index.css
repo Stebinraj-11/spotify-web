@@ -2,76 +2,171 @@
 
 @layer base {
   :root {
-    --bg-base: #121212;
-    --bg-surface: #181818;
-    --bg-highlight: #282828;
-    --bg-press: #000000;
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    --bg-canvas: #09090b;
+    --bg-panel: #111115;
+    --bg-surface: #17171d;
+    --bg-surface-elevated: #1f1f27;
+    --bg-surface-hover: #262631;
+
+    --border-subtle: rgba(255, 255, 255, 0.07);
+    --border-medium: rgba(255, 255, 255, 0.12);
+    --border-bright: rgba(255, 255, 255, 0.22);
+
     --text-primary: #ffffff;
-    --text-secondary: #b3b3b3;
-    --text-muted: #727272;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+
     --spotify-green: #1db954;
     --spotify-green-hover: #1ed760;
+    --spotify-green-glow: rgba(29, 185, 84, 0.35);
+  }
+
+  * {
+    border-color: var(--border-subtle);
   }
 
   body {
-    background-color: var(--bg-base);
+    background-color: var(--bg-canvas);
     color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--font-sans);
     margin: 0;
     padding: 0;
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Optical typography balancing */
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+    letter-spacing: -0.025em;
   }
 }
 
-/* Custom scrollbars like Spotify */
+/* Tabular figures for time, counts, durations */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.35);
 }
 
-/* Range input slider custom styling */
+/* Precision Range Input Slider */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
   cursor: pointer;
+  height: 16px;
 }
 
 input[type="range"]::-webkit-slider-runnable-track {
-  background: #4d4d4d;
+  background: rgba(255, 255, 255, 0.15);
   height: 4px;
-  border-radius: 2px;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease, height 0.15s ease;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  margin-top: -4px;
+  margin-top: -5px;
   background-color: #ffffff;
-  height: 12px;
-  width: 12px;
+  height: 14px;
+  width: 14px;
   border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), 0 0 6px var(--spotify-green-glow);
   opacity: 0;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transform: scale(0.7);
+  transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease;
 }
 
 .group:hover input[type="range"]::-webkit-slider-thumb,
 input[type="range"]:active::-webkit-slider-thumb {
   opacity: 1;
+  transform: scale(1);
 }
 
-input[type="range"]:hover::-webkit-slider-runnable-track {
-  background: #1db954;
+.group:hover input[type="range"]::-webkit-slider-runnable-track,
+input[type="range"]:active::-webkit-slider-runnable-track {
+  height: 5px;
+}
+
+/* Audio Visualizer Bouncing Waves in Track rows */
+@keyframes eq-wave-1 {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+@keyframes eq-wave-2 {
+  0%, 100% { height: 14px; }
+  50% { height: 6px; }
+}
+@keyframes eq-wave-3 {
+  0%, 100% { height: 8px; }
+  50% { height: 16px; }
+}
+
+.animate-eq-1 {
+  animation: eq-wave-1 0.75s ease-in-out infinite;
+}
+.animate-eq-2 {
+  animation: eq-wave-2 0.65s ease-in-out infinite 0.15s;
+}
+.animate-eq-3 {
+  animation: eq-wave-3 0.85s ease-in-out infinite 0.3s;
+}
+
+/* Atmospheric Ambient Aura Glow */
+@keyframes aura-pulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.04);
+  }
+}
+
+.animate-aura {
+  animation: aura-pulse 10s ease-in-out infinite;
+}
+
+/* Glass & Doppelrand utilities */
+.glass-card {
+  background: rgba(22, 22, 28, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card-hover:hover {
+  background: rgba(30, 30, 38, 0.75);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
 }
